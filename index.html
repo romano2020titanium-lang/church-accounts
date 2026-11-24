@@ -99,7 +99,7 @@ const DEF={church:'الكنيسة',cur:'ج.م',pin:'',
 let D=JSON.parse(JSON.stringify(DEF));let view='home';let flt={m:today().slice(0,7),q:'',t:'',c:''};
 let saveT=null;
 function save(){if(!CANW())return;clearTimeout(saveT);saveT=setTimeout(pushSettings,400)}
-async function pushSettings(){const {church,cur,wallets,cats,people,budget}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
+async function pushSettings(){const {church,cur,wallets,cats,people,budget,logo,m1}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget,logo,m1},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
 function toast(m){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:84px;right:50%;transform:translateX(50%);background:#1b2430;color:#fff;padding:10px 16px;border-radius:10px;z-index:200;font-size:14px';document.body.appendChild(t)}t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',3500)}
 const toRow=t=>({id:t.id,type:t.type,date:t.date,amt:t.amt,w:t.w||null,w2:t.w2||null,cat:t.cat||null,note:t.note||null,p:t.p||null,updated_at:new Date().toISOString()});
 const fromRow=r=>({id:r.id,type:r.type,date:r.date,amt:Number(r.amt),w:r.w,w2:r.w2,cat:r.cat||'',note:r.note||'',p:r.p||'',ts:Date.parse(r.updated_at)||0});
@@ -109,6 +109,7 @@ async function loadAll(){
  if(s.error||t.error){toast('تعذر تحميل البيانات');return}
  if(s.data&&s.data.data)D=Object.assign(JSON.parse(JSON.stringify(DEF)),s.data.data);else if(ROLE==='admin'){D=JSON.parse(JSON.stringify(DEF));await pushSettings()}
  D.tx=t.data.map(fromRow);
+ if(!D.m1){D.m1=1;['in','out'].forEach(k=>{if(!D.cats[k].includes('اشتراكات'))D.cats[k].push('اشتراكات')});if(CANW())pushSettings()}
 }
 const $=s=>document.querySelector(s);
 const uid=()=>Math.random().toString(36).slice(2,9);
