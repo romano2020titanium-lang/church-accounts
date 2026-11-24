@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1e3a5f">
+<title>حسابات الكنيسة</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--p:#1e3a5f;--p2:#2c5282;--ok:#1f8a5b;--bad:#c0392b;--bg:#f3f5f9;--card:#fff;--tx:#1b2430;--mu:#6b7686;--bd:#e1e6ee;--gold:#b8860b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",Arial,sans-serif;background:var(--bg);color:var(--tx);font-size:15px}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{display:flex;min-height:100vh}
+nav{width:230px;background:var(--p);color:#fff;padding:16px 10px;position:sticky;top:0;height:100vh;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+nav h1{font-size:18px;margin:4px 10px 14px;display:flex;gap:8px;align-items:center}
+nav button{background:none;border:0;color:#cfdcf0;text-align:right;padding:11px 12px;border-radius:10px;cursor:pointer;font-size:15px;display:flex;gap:10px;align-items:center}
+nav button.on,nav button:hover{background:rgba(255,255,255,.14);color:#fff}
+main{flex:1;padding:20px;max-width:1100px;margin:0 auto;width:100%;padding-bottom:90px}
+h2{margin:0 0 14px;font-size:22px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(20,30,50,.04)}
+.stat small{color:var(--mu);display:block;margin-bottom:6px}
+.stat b{font-size:24px}
+.in{color:var(--ok)}.out{color:var(--bad)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.btn{background:var(--p);color:#fff;border:0;border-radius:10px;padding:10px 16px;cursor:pointer}
+.btn.g{background:#fff;color:var(--p);border:1px solid var(--bd)}
+.btn.in2{background:var(--ok)}.btn.out2{background:var(--bad)}
+.btn.s{padding:5px 10px;font-size:13px}
+input,select,textarea{border:1px solid var(--bd);border-radius:10px;padding:10px;background:#fff;width:100%}
+label{display:block;font-size:13px;color:var(--mu);margin-bottom:4px}
+.f{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--bd);font-size:14px}
+th{background:#f0f3f8;color:var(--mu);font-weight:600}
+.tw{overflow-x:auto;border:1px solid var(--bd);border-radius:12px}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;background:#e8eef7;color:var(--p)}
+.modal{position:fixed;inset:0;background:rgba(10,20,40,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:12px}
+.modal.on{display:flex}
+.box{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:560px;max-height:92vh;overflow:auto}
+.bar{height:10px;border-radius:6px;background:#e6ebf3;overflow:hidden}.bar i{display:block;height:100%;background:var(--p2)}
+.chart{display:flex;align-items:flex-end;gap:6px;height:160px}
+.chart div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:11px;color:var(--mu)}
+.chart span{display:flex;gap:2px;align-items:flex-end;height:130px;width:100%;justify-content:center}
+.chart i{width:42%;border-radius:4px 4px 0 0;min-height:2px}
+.tabs{display:none}
+.fab{position:fixed;bottom:76px;left:16px;z-index:20;display:none}
+@media(max-width:800px){
+ nav{display:none}
+ .tabs{display:flex;position:fixed;bottom:0;right:0;left:0;background:var(--p);z-index:30;padding:4px 2px env(safe-area-inset-bottom)}
+ .tabs button{flex:1;background:none;border:0;color:#cfdcf0;padding:8px 2px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+ .tabs button.on{color:#fff;font-weight:700}.tabs button span{font-size:19px}
+ main{padding:14px 12px 100px}
+ .fab{display:block}
+ th,td{padding:8px 8px;font-size:13px}
+ .grid{grid-template-columns:1fr 1fr}.stat b{font-size:19px}
+}
+@media print{nav,.tabs,.fab,.noprint{display:none!important}main{max-width:none;padding:0}body{background:#fff}}
+#lock{position:fixed;inset:0;background:var(--p);z-index:99;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#fff}
+.lbox{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;padding:20px;text-align:center}
+.lbox input{text-align:left;font-size:16px;color:#1b2430}.lbtn{background:#fff!important;color:#1e3a5f!important;font-weight:700}
+.lbox a{color:#cfdcf0;font-size:14px}.lmsg{min-height:20px;font-size:14px;color:#ffd7d2}
+#lform{display:flex;flex-direction:column;gap:12px}
+body.ro .fab,body.ro .wr{display:none!important}
+</style>
+</head>
+<body>
+<div id="lock"><div class="lbox"><h1>⛪ حسابات الكنيسة</h1><div id="lmsg" class="lmsg"></div><div id="lform"><input id="em" type="email" inputmode="email" autocomplete="username" placeholder="البريد الإلكتروني" dir="ltr"><input id="pw" type="password" autocomplete="current-password" placeholder="كلمة المرور" dir="ltr"><button class="btn lbtn" id="lgo" onclick="doAuth()">دخول</button><a href="#" id="lsw" onclick="swAuth();return false">مستخدم جديد؟ إنشاء حساب</a></div></div></div></div>
+<div class="app">
+<nav id="nav"></nav>
+<main id="main"></main>
+</div>
+<div class="tabs" id="tabs"></div>
+<button class="btn fab" onclick="openTx('in')">＋ حركة</button>
+<div class="modal" id="modal"><div class="box" id="box"></div></div>
+
+<script>
+const SB=supabase.createClient('https://eeaalajfycetfjccfute.supabase.co','sb_publishable_CYTXG2LLcWkEbcj4rf7ECw_3ftETaOq');
+let ME=null,ROLE='none',authMode='in';
+const CANW=()=>ROLE==='admin'||ROLE==='treasurer';
+
+const lc=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>lc(new Date());
+const DEF={church:'الكنيسة',cur:'ج.م',pin:'',
+ wallets:[{id:'w1',name:'الخزنة',open:0},{id:'w2',name:'البنك',open:0}],
+ cats:{in:['عشور','تقدمات','تبرعات','نذور','كشافة وخدمات','إيرادات أخرى'],out:['مرتبات','كهرباء ومياه','صيانة','مساعدات اجتماعية','خدمات ورحلات','مصروفات إدارية','مصروفات أخرى']},
+ people:[],tx:[],budget:{}};
+let D=JSON.parse(JSON.stringify(DEF));let view='home';let flt={m:today().slice(0,7),q:'',t:'',c:''};
+let saveT=null;
+function save(){if(!CANW())return;clearTimeout(saveT);saveT=setTimeout(pushSettings,400)}
+async function pushSettings(){const {church,cur,wallets,cats,people,budget}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
+function toast(m){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:84px;right:50%;transform:translateX(50%);background:#1b2430;color:#fff;padding:10px 16px;border-radius:10px;z-index:200;font-size:14px';document.body.appendChild(t)}t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',3500)}
+const toRow=t=>({id:t.id,type:t.type,date:t.date,amt:t.amt,w:t.w||null,w2:t.w2||null,cat:t.cat||null,note:t.note||null,p:t.p||null,updated_at:new Date().toISOString()});
+const fromRow=r=>({id:r.id,type:r.type,date:r.date,amt:Number(r.amt),w:r.w,w2:r.w2,cat:r.cat||'',note:r.note||'',p:r.p||'',ts:Date.parse(r.updated_at)||0});
+async function upsertTx(t){const {error}=await SB.from('tx').upsert(toRow(t));if(error){toast('تعذر الحفظ: '+error.message);return false}return true}
+async function loadAll(){
+ const [s,t]=await Promise.all([SB.from('settings').select('data').eq('id',1).maybeSingle(),SB.from('tx').select('*').order('date',{ascending:false}).limit(20000)]);
+ if(s.error||t.error){toast('تعذر تحميل البيانات');return}
+ if(s.data&&s.data.data)D=Object.assign(JSON.parse(JSON.stringify(DEF)),s.data.data);else if(ROLE==='admin'){D=JSON.parse(JSON.stringify(DEF));await pushSettings()}
+ D.tx=t.data.map(fromRow);
+}
+const $=s=>document.querySelector(s);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const fmt=n=>(Math.round(n*100)/100).toLocaleString('en-US')+' '+D.cur;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const wname=id=>(D.wallets.find(w=>w.id===id)||{name:'—'}).name;
+const pname=id=>(D.people.find(p=>p.id===id)||{name:''}).name;
+const MN=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const mlabel=m=>MN[+m.slice(5,7)-1]+' '+m.slice(0,4);
+const NAV=[['home','🏠','الرئيسية'],['tx','📒','الحركات'],['rep','📊','التقارير'],['ppl','👥','الأعضاء'],['set','⚙️','الإعدادات']];
+function walletBal(w){return w.open+D.tx.reduce((a,t)=>{if(t.type==='in'&&t.w===w.id)return a+t.amt;if(t.type==='out'&&t.w===w.id)return a-t.amt;if(t.type==='tr'){if(t.w===w.id)a-=t.amt;if(t.w2===w.id)a+=t.amt}return a},0)}
+function sum(list,type){return list.filter(t=>t.type===type).reduce((a,t)=>a+t.amt,0)}
+function nav(){
+ $('#nav').innerHTML='<h1>⛪ '+esc(D.church)+'</h1>'+NAV.map(n=>`<button class="${view===n[0]?'on':''}" onclick="go('${n[0]}')">${n[1]} ${n[2]}</button>`).join('')+'<div style="flex:1"></div><div style="font-size:12px;color:#9fb4d4;padding:6px 12px;word-break:break-all">'+esc(ME?ME.email:'')+'<br>'+({admin:'مدير',treasurer:'أمين صندوق',viewer:'مشاهدة فقط'}[ROLE]||'')+'</div><button onclick="logout()">🚪 خروج</button>';
+ $('#tabs').innerHTML=NAV.map(n=>`<button class="${view===n[0]?'on':''}" onclick="go('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join('');
+}
+function go(v){view=v;render();scrollTo(0,0)}
+function render(){nav();({home,tx,rep,ppl,set})[view]()}
+
+function home(){
+ const m=today().slice(0,7);const mt=D.tx.filter(t=>t.date.startsWith(m));
+ const total=D.wallets.reduce((a,w)=>a+walletBal(w),0);
+ const months=[];for(let i=5;i>=0;i--){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-i);months.push(lc(d).slice(0,7))}
+ const data=months.map(x=>{const l=D.tx.filter(t=>t.date.startsWith(x));return[x,sum(l,'in'),sum(l,'out')]});
+ const mx=Math.max(1,...data.flat().filter(v=>typeof v==='number'));
+ const last=[...D.tx].sort((a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts).slice(0,6);
+ $('#main').innerHTML=`<h2>${esc(D.church)}</h2>
+ <div class="grid">
+ <div class="card stat"><small>إجمالي الرصيد</small><b>${fmt(total)}</b></div>
+ <div class="card stat"><small>إيرادات ${mlabel(m)}</small><b class="in">${fmt(sum(mt,'in'))}</b></div>
+ <div class="card stat"><small>مصروفات ${mlabel(m)}</small><b class="out">${fmt(sum(mt,'out'))}</b></div>
+ <div class="card stat"><small>صافي الشهر</small><b>${fmt(sum(mt,'in')-sum(mt,'out'))}</b></div></div>
+ <div class="row wr" style="margin-top:14px"><button class="btn in2" onclick="openTx('in')">＋ إيراد</button><button class="btn out2" onclick="openTx('out')">－ مصروف</button><button class="btn g" onclick="openTx('tr')">⇄ تحويل</button></div>
+ <div class="grid"><div class="card"><b>الحسابات</b><div style="margin-top:10px">${D.wallets.map(w=>`<div class="row" style="justify-content:space-between;margin:0;padding:8px 0;border-bottom:1px solid var(--bd)"><span>${esc(w.name)}</span><b>${fmt(walletBal(w))}</b></div>`).join('')}</div></div>
+ <div class="card"><b>آخر ٦ شهور</b><div class="chart" style="margin-top:10px">${data.map(d=>`<div><span><i style="background:var(--ok);height:${d[1]/mx*100}%"></i><i style="background:var(--bad);height:${d[2]/mx*100}%"></i></span>${MN[+d[0].slice(5)-1].slice(0,4)}</div>`).join('')}</div><small style="color:var(--mu)">🟩 إيرادات &nbsp; 🟥 مصروفات</small></div></div>
+ <h3>آخر الحركات</h3>${txTable(last,false)}`;
+}
+function txTable(list,act=true){
+ if(!list.length)return '<div class="card" style="text-align:center;color:var(--mu)">لا توجد حركات</div>';
+ return `<div class="tw"><table><tr><th>التاريخ</th><th>البيان</th><th>التصنيف</th><th>الحساب</th><th>المبلغ</th>${act?'<th class="wr"></th>':''}</tr>${list.map(t=>`<tr><td>${t.date}</td><td>${esc(t.note||'')}${t.p?' <span class="tag">'+esc(pname(t.p))+'</span>':''}</td><td>${t.type==='tr'?'تحويل':esc(t.cat)}</td><td>${esc(wname(t.w))}${t.type==='tr'?' ← '+esc(wname(t.w2)):''}</td><td class="${t.type==='in'?'in':t.type==='out'?'out':''}"><b>${t.type==='out'?'-':t.type==='in'?'+':''}${fmt(t.amt)}</b></td>${act?`<td class="wr" style="white-space:nowrap"><button class="btn g s" onclick="openTx(null,'${t.id}')">تعديل</button> <button class="btn g s" onclick="delTx('${t.id}')">حذف</button></td>`:''}</tr>`).join('')}</table></div>`;
+}
+function filtered(){return D.tx.filter(t=>(!flt.m||t.date.startsWith(flt.m))&&(!flt.t||t.type===flt.t)&&(!flt.c||t.cat===flt.c)&&(!flt.q||((t.note||'')+pname(t.p)+(t.cat||'')).includes(flt.q))).sort((a,b)=>b.date.localeCompare(a.date)||b.ts-a.ts)}
+function tx(){
+ const l=filtered();const allc=[...D.cats.in,...D.cats.out];
+ $('#main').innerHTML=`<h2>الحركات</h2><div class="card noprint" style="margin-bottom:12px"><div class="f">
+ <div><label>الشهر</label><input type="month" value="${flt.m}" onchange="flt.m=this.value;tx()"></div>
+ <div><label>النوع</label><select onchange="flt.t=this.value;tx()"><option value="">الكل</option><option value="in" ${flt.t==='in'?'selected':''}>إيراد</option><option value="out" ${flt.t==='out'?'selected':''}>مصروف</option><option value="tr" ${flt.t==='tr'?'selected':''}>تحويل</option></select></div>
+ <div><label>التصنيف</label><select onchange="flt.c=this.value;tx()"><option value="">الكل</option>${allc.map(c=>`<option ${flt.c===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+ <div><label>بحث</label><input value="${esc(flt.q)}" onchange="flt.q=this.value;tx()" placeholder="بيان أو اسم"></div></div></div>
+ <div class="row"><b class="in">إيرادات: ${fmt(sum(l,'in'))}</b><b class="out">مصروفات: ${fmt(sum(l,'out'))}</b><span style="flex:1"></span><button class="btn g noprint" onclick="csv(filtered())">⬇ Excel/CSV</button><button class="btn g noprint" onclick="print()">🖨 طباعة</button></div>${txTable(l)}`;
+}
+function openTx(type,id){
+ const t=id?D.tx.find(x=>x.id===id):{type,date:today(),w:D.wallets[0].id,w2:(D.wallets[1]||D.wallets[0]).id,cat:'',amt:'',note:'',p:''};
+ const ty=t.type;
+ $('#box').innerHTML=`<h2>${id?'تعديل':'حركة جديدة'}</h2>
+ <div class="row">${[['in','إيراد'],['out','مصروف'],['tr','تحويل']].map(a=>`<button class="btn ${ty===a[0]?'':'g'}" onclick="swType('${a[0]}','${id||''}')">${a[1]}</button>`).join('')}</div>
+ <div class="f"><div><label>التاريخ</label><input type="date" id="f_date" value="${t.date}"></div>
+ <div><label>المبلغ (${esc(D.cur)})</label><input type="number" step="0.01" inputmode="decimal" id="f_amt" value="${t.amt}"></div>
+ <div><label>${ty==='tr'?'من حساب':'الحساب'}</label><select id="f_w">${D.wallets.map(w=>`<option value="${w.id}" ${t.w===w.id?'selected':''}>${esc(w.name)}</option>`).join('')}</select></div>
+ ${ty==='tr'?`<div><label>إلى حساب</label><select id="f_w2">${D.wallets.map(w=>`<option value="${w.id}" ${t.w2===w.id?'selected':''}>${esc(w.name)}</option>`).join('')}</select></div>`:`<div><label>التصنيف</label><select id="f_cat">${D.cats[ty].map(c=>`<option ${t.cat===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>`}
+ ${ty!=='tr'?`<div><label>${ty==='in'?'المتبرع / العضو':'المستفيد'} (اختياري)</label><select id="f_p"><option value="">—</option>${D.people.map(p=>`<option value="${p.id}" ${t.p===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select></div>`:''}</div>
+ <div style="margin-top:12px"><label>بيان</label><input id="f_note" value="${esc(t.note)}"></div>
+ <div class="row" style="margin-top:16px"><button class="btn" onclick="saveTx('${ty}','${id||''}')">حفظ</button><button class="btn g" onclick="closeM()">إلغاء</button></div>`;
+ $('#modal').classList.add('on');
+}
+function swType(ty,id){if(id){const t=D.tx.find(x=>x.id===id);t.type=ty;t.cat=ty==='tr'?'':D.cats[ty][0]||'';}openTx(ty,id||null)}
+async function saveTx(ty,id){
+ const amt=parseFloat($('#f_amt').value);if(!(amt>0)){alert('اكتب مبلغ صحيح');return}
+ const o={type:ty,date:$('#f_date').value||today(),amt,w:$('#f_w').value,note:$('#f_note').value.trim()};
+ if(ty==='tr'){o.w2=$('#f_w2').value;if(o.w===o.w2){alert('اختار حسابين مختلفين');return}}else{o.cat=$('#f_cat').value;o.p=$('#f_p').value}
+ let row;if(id){row=D.tx.find(x=>x.id===id);Object.assign(row,o)}else{o.id=uid()+uid();o.ts=Date.now();D.tx.push(o);row=o}
+ upsertTx(row).then(ok=>{if(!ok)refresh()});closeM();render();
+}
+function delTx(id){if(confirm('حذف الحركة؟')){D.tx=D.tx.filter(t=>t.id!==id);SB.from('tx').delete().eq('id',id).then(r=>{if(r.error)toast('تعذر الحذف')});render()}}
+function closeM(){$('#modal').classList.remove('on')}
+
+function rep(){
+ const l=filtered();const by=(type)=>{const m={};l.filter(t=>t.type===type).forEach(t=>m[t.cat]=(m[t.cat]||0)+t.amt);return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+ const ti=sum(l,'in'),to=sum(l,'out');
+ const blk=(title,rows,tot,col)=>`<div class="card"><b>${title}</b>${rows.map(r=>`<div style="margin-top:10px"><div class="row" style="justify-content:space-between;margin:0 0 4px"><span>${esc(r[0])}</span><b>${fmt(r[1])}</b></div><div class="bar"><i style="width:${tot?r[1]/tot*100:0}%;background:${col}"></i></div></div>`).join('')||'<div style="color:var(--mu);margin-top:8px">لا يوجد</div>'}</div>`;
+ const bud=D.cats.out.map(c=>{const b=+D.budget[c]||0;const s=l.filter(t=>t.type==='out'&&t.cat===c).reduce((a,t)=>a+t.amt,0);return b?[c,b,s]:null}).filter(Boolean);
+ $('#main').innerHTML=`<h2>التقارير</h2><div class="row noprint"><div><label>الشهر</label><input type="month" value="${flt.m}" onchange="flt.m=this.value;flt.t='';flt.c='';flt.q='';rep()"></div><button class="btn g" onclick="flt.m='';flt.t='';flt.c='';flt.q='';rep()">كل الفترات</button><span style="flex:1"></span><button class="btn g" onclick="csv(l_())">⬇ Excel/CSV</button><button class="btn" onclick="print()">🖨 طباعة / PDF</button></div>
+ <h3 style="margin:6px 0">${esc(D.church)} - كشف حساب ${flt.m?mlabel(flt.m):'كل الفترات'}</h3>
+ <div class="grid"><div class="card stat"><small>إجمالي الإيرادات</small><b class="in">${fmt(ti)}</b></div><div class="card stat"><small>إجمالي المصروفات</small><b class="out">${fmt(to)}</b></div><div class="card stat"><small>الفائض / العجز</small><b>${fmt(ti-to)}</b></div></div>
+ <div class="grid" style="margin-top:12px">${blk('الإيرادات حسب التصنيف',by('in'),ti,'var(--ok)')}${blk('المصروفات حسب التصنيف',by('out'),to,'var(--bad)')}</div>
+ ${bud.length?`<div class="card" style="margin-top:12px"><b>الميزانية الشهرية مقابل الفعلي</b>${bud.map(r=>`<div style="margin-top:10px"><div class="row" style="justify-content:space-between;margin:0 0 4px"><span>${esc(r[0])}</span><span class="${r[2]>r[1]?'out':''}">${fmt(r[2])} / ${fmt(r[1])}</span></div><div class="bar"><i style="width:${Math.min(100,r[2]/r[1]*100)}%;background:${r[2]>r[1]?'var(--bad)':'var(--ok)'}"></i></div></div>`).join('')}</div>`:''}
+ <h3>تفاصيل الحركات</h3>${txTable(l,false)}`;
+}
+function l_(){return filtered()}
+function ppl(){
+ const tot=id=>D.tx.filter(t=>t.p===id&&t.type==='in').reduce((a,t)=>a+t.amt,0);
+ $('#main').innerHTML=`<h2>الأعضاء والمتبرعين</h2><div class="row"><input id="np" placeholder="اسم جديد" style="max-width:260px"><input id="nph" placeholder="تليفون (اختياري)" style="max-width:200px"><button class="btn" onclick="addP()">إضافة</button></div>
+ ${D.people.length?`<div class="tw"><table><tr><th>الاسم</th><th>التليفون</th><th>إجمالي ما دفعه</th><th></th></tr>${D.people.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.phone||'')}</td><td>${fmt(tot(p.id))}</td><td><button class="btn g s" onclick="delP('${p.id}')">حذف</button></td></tr>`).join('')}</table></div>`:'<div class="card" style="color:var(--mu);text-align:center">لسه مفيش أسماء</div>'}`;
+}
+function addP(){const n=$('#np').value.trim();if(!n)return;D.people.push({id:uid(),name:n,phone:$('#nph').value.trim()});save();ppl()}
+function delP(id){if(confirm('حذف الاسم؟ الحركات المرتبطة هتفضل موجودة.')){D.people=D.people.filter(p=>p.id!==id);save();ppl()}}
+
+function set(){setTimeout(loadUsers,0);
+ $('#main').innerHTML=`<h2>الإعدادات</h2>
+ <div class="card"><div class="f"><div><label>اسم الكنيسة</label><input id="s_ch" value="${esc(D.church)}"></div><div><label>العملة</label><input id="s_cur" value="${esc(D.cur)}"></div></div><div class="row" style="margin-top:12px"><button class="btn" onclick="saveS()">حفظ</button></div></div>
+ <h3>الحسابات (خزنة / بنك)</h3><div class="card">${D.wallets.map(w=>`<div class="row"><input value="${esc(w.name)}" onchange="wUp('${w.id}','name',this.value)" style="max-width:200px"><input type="number" value="${w.open}" onchange="wUp('${w.id}','open',+this.value)" style="max-width:160px" title="رصيد افتتاحي"><small style="color:var(--mu)">رصيد افتتاحي</small>${D.wallets.length>1?`<button class="btn g s" onclick="wDel('${w.id}')">حذف</button>`:''}</div>`).join('')}<button class="btn g" onclick="D.wallets.push({id:uid(),name:'حساب جديد',open:0});save();set()">＋ حساب</button></div>
+ ${['in','out'].map(k=>`<h3>تصنيفات ${k==='in'?'الإيرادات':'المصروفات'}</h3><div class="card"><div class="row">${D.cats[k].map((c,i)=>`<span class="tag">${esc(c)} <a href="#" onclick="cDel('${k}',${i});return false">✕</a></span>`).join('')}</div><div class="row"><input id="nc_${k}" placeholder="تصنيف جديد" style="max-width:220px"><button class="btn g" onclick="cAdd('${k}')">إضافة</button></div></div>`).join('')}
+ <h3>الميزانية الشهرية للمصروفات</h3><div class="card"><div class="f">${D.cats.out.map(c=>`<div><label>${esc(c)}</label><input type="number" value="${D.budget[c]||''}" onchange="D.budget[${JSON.stringify(c).replace(/"/g,'&quot;')}]=+this.value;save()"></div>`).join('')}</div></div>
+ ${ROLE==='admin'?'<h3>المستخدمون والصلاحيات</h3><div class="card" id="users">جاري التحميل...</div>':''}
+ <h3>نسخة احتياطية</h3><div class="card"><p style="margin-top:0;color:var(--mu)">البيانات محفوظة أونلاين ومتزامنة بين كل الأجهزة. حمّل نسخة احتياطية من وقت للتاني. "استرجاع" بيضيف حركات من ملف نسخة قديمة.</p><div class="row"><button class="btn" onclick="backup()">⬇ تحميل نسخة</button><button class="btn g" onclick="$('#rf').click()">⬆ استرجاع نسخة</button><input type="file" id="rf" accept=".json" style="display:none" onchange="restore(this.files[0])"></div></div>`;
+}
+async function loadUsers(){const el=$('#users');if(!el)return;const {data,error}=await SB.from('members').select('*').order('created_at');if(error){el.textContent='تعذر التحميل';return}el.innerHTML='<div class="tw"><table><tr><th>البريد</th><th>الصلاحية</th><th></th></tr>'+data.map(u=>`<tr><td dir="ltr" style="text-align:right">${esc(u.email)}</td><td><select onchange="setRole('${u.user_id}',this.value)" ${u.user_id===ME.id?'disabled':''}>${[['pending','في الانتظار'],['viewer','مشاهدة فقط'],['treasurer','أمين صندوق'],['admin','مدير']].map(r=>`<option value="${r[0]}" ${u.role===r[0]?'selected':''}>${r[1]}</option>`).join('')}</select></td><td>${u.user_id===ME.id?'':`<button class="btn g s" onclick="rmUser('${u.user_id}')">حذف</button>`}</td></tr>`).join('')+'</table></div>'}
+async function setRole(id,r){const {error}=await SB.from('members').update({role:r}).eq('user_id',id);toast(error?'تعذر التعديل':'تم')}
+async function rmUser(id){if(confirm('إزالة المستخدم من النظام؟')){await SB.from('members').delete().eq('user_id',id);loadUsers()}}
+function saveS(){D.church=$('#s_ch').value||'الكنيسة';D.cur=$('#s_cur').value||'ج.م';save();render()}
+function wUp(id,k,v){D.wallets.find(w=>w.id===id)[k]=v;save()}
+function wDel(id){if(D.tx.some(t=>t.w===id||t.w2===id)){alert('الحساب عليه حركات ولا يمكن حذفه');return}D.wallets=D.wallets.filter(w=>w.id!==id);save();set()}
+function cAdd(k){const v=$('#nc_'+k).value.trim();if(v&&!D.cats[k].includes(v)){D.cats[k].push(v);save();set()}}
+function cDel(k,i){D.cats[k].splice(i,1);save();set()}
+function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+function backup(){dl('church-backup-'+today()+'.json',JSON.stringify(D),'application/json')}
+function restore(f){if(!f)return;const r=new FileReader();r.onload=async()=>{try{const o=JSON.parse(r.result);if(!o.tx||!o.wallets)throw 0;if(!confirm('هيتم دمج الإعدادات والحركات من الملف مع البيانات الحالية. متأكد؟'))return;const keep=D.tx;D=Object.assign(JSON.parse(JSON.stringify(DEF)),o,{tx:keep});await pushSettings();const rows=o.tx.map(t=>toRow(Object.assign({},t,{id:t.id||uid()+uid()})));for(let i=0;i<rows.length;i+=200){const {error}=await SB.from('tx').upsert(rows.slice(i,i+200));if(error){toast('تعذر الاستيراد: '+error.message);break}}await refresh();toast('تم الاسترجاع')}catch(e){alert('ملف غير صالح')}};r.readAsText(f)}
+function csv(l){const q=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"';const rows=[['التاريخ','النوع','التصنيف','الحساب','إلى','المبلغ','الاسم','البيان']].concat(l.map(t=>[t.date,{in:'إيراد',out:'مصروف',tr:'تحويل'}[t.type],t.cat||'',wname(t.w),t.type==='tr'?wname(t.w2):'',t.amt,pname(t.p),t.note||'']));dl('church-'+today()+'.csv','\ufeff'+rows.map(r=>r.map(q).join(',')).join('\r\n'),'text/csv')}
+
+function swAuth(){authMode=authMode==='in'?'up':'in';$('#lgo').textContent=authMode==='in'?'دخول':'إنشاء حساب';$('#lsw').textContent=authMode==='in'?'مستخدم جديد؟ إنشاء حساب':'عندي حساب؟ دخول';$('#lmsg').textContent=''}
+async function doAuth(){const email=$('#em').value.trim(),pw=$('#pw').value;if(!email||pw.length<6){$('#lmsg').textContent='اكتب البريد وكلمة مرور (6 حروف على الأقل)';return}
+ $('#lgo').disabled=true;$('#lmsg').textContent='...';
+ let r=authMode==='in'?await SB.auth.signInWithPassword({email,password:pw}):await SB.auth.signUp({email,password:pw});
+ $('#lgo').disabled=false;
+ if(r.error){$('#lmsg').textContent=({'Invalid login credentials':'البريد أو كلمة المرور غير صحيحة','User already registered':'الحساب موجود، سجّل دخول'}[r.error.message]||r.error.message);return}
+ if(!r.data.session){$('#lmsg').textContent='تم إنشاء الحساب. سجّل دخول.';authMode='up';swAuth();return}
+ boot()}
+async function logout(){await SB.auth.signOut();location.reload()}
+async function getRole(){const {data}=await SB.from('members').select('role').eq('user_id',ME.id).maybeSingle();return data?data.role:'none'}
+async function boot(){
+ const {data}=await SB.auth.getSession();
+ if(!data.session){$('#lock').style.display='flex';return}
+ ME=data.session.user;ROLE=await getRole();
+ if(ROLE==='pending'||ROLE==='none'){$('#lock').style.display='flex';$('#lform').innerHTML='<div style="color:#fff;line-height:1.8">تم تسجيل حسابك ('+esc(ME.email)+').<br>في انتظار موافقة مدير النظام.</div><button class="btn lbtn" onclick="boot()">تحديث</button><a href="#" onclick="logout();return false">خروج</a>';return}
+ $('#lock').style.display='none';document.body.classList.toggle('ro',!CANW());
+ await loadAll();render();
+}
+async function refresh(){if(!ME||!CANW()&&ROLE!=='viewer')return;if($('#modal').classList.contains('on'))return;const ae=document.activeElement;if(ae&&/INPUT|SELECT|TEXTAREA/.test(ae.tagName)&&ae.id!=='')return;await loadAll();render()}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
+$('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')doAuth()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+setInterval(()=>{if(!document.hidden)refresh()},30000);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+boot();
+</script>
+</body>
+</html>
