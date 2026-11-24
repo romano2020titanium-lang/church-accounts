@@ -99,7 +99,7 @@ const DEF={church:'الكنيسة',cur:'ج.م',pin:'',
 let D=JSON.parse(JSON.stringify(DEF));let view='home';let flt={m:today().slice(0,7),q:'',t:'',c:''};
 let saveT=null;
 function save(){if(!CANW())return;clearTimeout(saveT);saveT=setTimeout(pushSettings,400)}
-async function pushSettings(){const {church,cur,wallets,cats,people,budget,logo,m1}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget,logo,m1},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
+async function pushSettings(){const {church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
 function toast(m){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:84px;right:50%;transform:translateX(50%);background:#1b2430;color:#fff;padding:10px 16px;border-radius:10px;z-index:200;font-size:14px';document.body.appendChild(t)}t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',3500)}
 const toRow=t=>({id:t.id,type:t.type,date:t.date,amt:t.amt,w:t.w||null,w2:t.w2||null,cat:t.cat||null,note:t.note||null,p:t.p||null,updated_at:new Date().toISOString()});
 const fromRow=r=>({id:r.id,type:r.type,date:r.date,amt:Number(r.amt),w:r.w,w2:r.w2,cat:r.cat||'',note:r.note||'',p:r.p||'',ts:Date.parse(r.updated_at)||0});
@@ -120,7 +120,7 @@ const wname=id=>(D.wallets.find(w=>w.id===id)||{name:'—'}).name;
 const pname=id=>(D.people.find(p=>p.id===id)||{name:''}).name;
 const MN=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const mlabel=m=>MN[+m.slice(5,7)-1]+' '+m.slice(0,4);
-const NAV=[['home','🏠','الرئيسية'],['tx','📒','الحركات'],['rep','📊','التقارير'],['ppl','👥','الأعضاء'],['set','⚙️','الإعدادات']];
+const NAV=[['home','🏠','الرئيسية'],['tx','📒','الحركات'],['rep','📊','التقارير'],['ppl','👥','الأعضاء'],['sub','✅','اشتراكات'],['set','⚙️','الإعدادات']];
 function walletBal(w){return w.open+D.tx.reduce((a,t)=>{if(t.type==='in'&&t.w===w.id)return a+t.amt;if(t.type==='out'&&t.w===w.id)return a-t.amt;if(t.type==='tr'){if(t.w===w.id)a-=t.amt;if(t.w2===w.id)a+=t.amt}return a},0)}
 function sum(list,type){return list.filter(t=>t.type===type).reduce((a,t)=>a+t.amt,0)}
 function nav(){
@@ -128,7 +128,7 @@ function nav(){
  $('#tabs').innerHTML=NAV.map(n=>`<button class="${view===n[0]?'on':''}" onclick="go('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join('');
 }
 function go(v){view=v;render();scrollTo(0,0)}
-function render(){nav();({home,tx,rep,ppl,set})[view]()}
+function render(){nav();({home,tx,rep,ppl,sub,set})[view]()}
 
 function home(){
  const m=today().slice(0,7);const mt=D.tx.filter(t=>t.date.startsWith(m));
@@ -205,6 +205,30 @@ function ppl(){
  $('#main').innerHTML=`<h2>الأعضاء والمتبرعين</h2><div class="row"><input id="np" placeholder="اسم جديد" style="max-width:260px"><input id="nph" placeholder="تليفون (اختياري)" style="max-width:200px"><button class="btn" onclick="addP()">إضافة</button></div>
  ${D.people.length?`<div class="tw"><table><tr><th>الاسم</th><th>التليفون</th><th>إجمالي ما دفعه</th><th></th></tr>${D.people.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.phone||'')}</td><td>${fmt(tot(p.id))}</td><td><button class="btn g s" onclick="delP('${p.id}')">حذف</button></td></tr>`).join('')}</table></div>`:'<div class="card" style="color:var(--mu);text-align:center">لسه مفيش أسماء</div>'}`;
 }
+let subMode='m',subM=today().slice(0,7),subY=today().slice(0,4);
+function subKey(){return subMode==='m'?subM:subY}
+function sub(){
+ D.subAmt=D.subAmt||{m:0,y:0};const k=subKey(),amt=+D.subAmt[subMode]||0;const ptx={};D.tx.forEach(t=>{if(t.id.startsWith('sub_'+k+'_'))ptx[t.p]=t});const paid=ptx;
+ const n=D.people.filter(p=>paid[p.id]).length;const got=D.people.reduce((a,p)=>a+(paid[p.id]?paid[p.id].amt:0),0);
+ $('#main').innerHTML=`<h2>الاشتراكات</h2>
+ <div class="card"><div class="f">
+ <div><label>نوع الاشتراك</label><select id="sb_mode" onchange="subMode=this.value;sub()"><option value="m" ${subMode==='m'?'selected':''}>شهري</option><option value="y" ${subMode==='y'?'selected':''}>سنوي</option></select></div>
+ <div><label>${subMode==='m'?'الشهر':'السنة'}</label>${subMode==='m'?`<input id="sb_p" type="month" value="${subM}" onchange="subM=this.value||subM;sub()">`:`<input id="sb_p" type="number" value="${subY}" onchange="subY=this.value||subY;sub()">`}</div>
+ <div><label>قيمة الاشتراك للفرد</label><input id="sb_amt" type="number" value="${amt||''}" placeholder="0" onchange="subAmtSet(this.value)" class="wr"></div></div></div>
+ <div class="row" style="margin-top:12px"><span class="card" style="padding:8px 14px">دفعوا: <b>${n}</b> من ${D.people.length}</span><span class="card" style="padding:8px 14px">لم يدفعوا: <b>${D.people.length-n}</b></span>${got?`<span class="card" style="padding:8px 14px">دخل الخزنة: <b>${fmt(got)}</b></span>`:''}</div>
+ <div class="row wr"><input id="np" placeholder="إضافة عضو جديد" style="max-width:260px"><button class="btn" onclick="addP2()">إضافة</button></div>
+ ${D.people.length?`<div class="tw"><table><tr><th style="width:60px">دفع</th><th>الاسم</th><th>التليفون</th></tr>${D.people.map(p=>`<tr><td><input type="checkbox" id="sbc_${p.id}" style="width:24px;height:24px" ${paid[p.id]?'checked':''} ${CANW()?'':'disabled'} onchange="subTick('${p.id}',this.checked)"></td><td>${esc(p.name)}</td><td>${esc(p.phone||'')}</td></tr>`).join('')}</table></div>`:'<div class="card" style="color:var(--mu);text-align:center">مفيش أعضاء لسه. أضف الأسماء من فوق.</div>'}`;
+}
+function subWallet(){return (D.wallets.find(w=>w.name.includes('الخزنة'))||D.wallets[0]).id}
+async function subTick(id,v){if(!CANW())return;const k=subKey(),tid='sub_'+k+'_'+id,amt=+(D.subAmt&&D.subAmt[subMode])||0;
+ if(v){if(!(amt>0)){toast('اكتب قيمة الاشتراك الأول');sub();return}
+  const cur=today(),d=(subMode==='m'?cur.slice(0,7)===k:cur.slice(0,4)===k)?cur:(subMode==='m'?k+'-01':k+'-01-01');
+  const t={id:tid,type:'in',date:d,amt:amt,w:subWallet(),w2:'',cat:'اشتراكات',note:'اشتراك '+(subMode==='m'?'شهر ':'سنة ')+k,p:id,ts:Date.now()};
+  if(await upsertTx(t)){D.tx=D.tx.filter(x=>x.id!==tid);D.tx.push(t)}}
+ else{const r=await SB.from('tx').delete().eq('id',tid);if(r.error){toast('تعذر الحذف');sub();return}D.tx=D.tx.filter(x=>x.id!==tid)}
+ sub()}
+function subAmtSet(v){D.subAmt=D.subAmt||{m:0,y:0};D.subAmt[subMode]=+v||0;pushSettings();sub()}
+function addP2(){const n=$('#np').value.trim();if(!n)return;D.people.push({id:uid(),name:n,phone:''});pushSettings();sub()}
 function addP(){const n=$('#np').value.trim();if(!n)return;D.people.push({id:uid(),name:n,phone:$('#nph').value.trim()});save();ppl()}
 function delP(id){if(confirm('حذف الاسم؟ الحركات المرتبطة هتفضل موجودة.')){D.people=D.people.filter(p=>p.id!==id);save();ppl()}}
 
