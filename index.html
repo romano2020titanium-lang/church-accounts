@@ -260,7 +260,8 @@ function alerts(){const a=[],m=today().slice(0,7);const cash=D.wallets.find(w=>w
  if(ROLE==='admin'){const pd=new Date();pd.setDate(1);pd.setMonth(pd.getMonth()-1);const pm=lc(pd).slice(0,7);if(D.tx.some(t=>t.date.startsWith(pm))&&(!D.lockedUntil||D.lockedUntil<pm))a.push('🔒 فكّر تقفل شهر '+mlabel(pm)+' بعد المراجعة (الإعدادات)')}
  return a.length?'<div class="card" style="margin:12px 0;background:#fff8e6;border-color:#f0d9a0;line-height:2">'+a.join('<br>')+'</div>':''}
 let arY=today().slice(0,4),stmId='';
-function arMonths(y){const n=y===today().slice(0,4)?+today().slice(5,7):12;const r=[];for(let i=1;i<=n;i++)r.push(y+'-'+String(i).padStart(2,'0'));return r}
+function subStart(){const ks=D.tx.filter(t=>t.id.startsWith('sub_')).map(t=>t.id.slice(4,11)).sort();return D.subStart||ks[0]||today().slice(0,7)}
+function arMonths(y){const n=y===today().slice(0,4)?+today().slice(5,7):12;const r=[];for(let i=1;i<=n;i++)r.push(y+'-'+String(i).padStart(2,'0'));return r.filter(k=>k>=subStart())}
 function amtFor(k,id){return +((D.subCustom&&D.subCustom[k]&&D.subCustom[k][id])||(D.subAmt&&D.subAmt.m)||0)}
 function arr(){const ms=arMonths(arY);
  const rows=D.people.map(p=>{let un=0,owed=0,paid=0;ms.forEach(k=>{const t=D.tx.find(x=>x.id==='sub_'+k+'_'+p.id);if(t)paid+=t.amt;else{un++;owed+=amtFor(k,p.id)}});return{p,un,owed,paid}}).sort((a,b)=>b.owed-a.owed);
