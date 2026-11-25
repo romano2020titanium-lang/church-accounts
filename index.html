@@ -115,7 +115,7 @@ main>*{animation:fade .35s ease both}main>*:nth-child(2){animation-delay:.04s}ma
 </style>
 </head>
 <body>
-<div id="lock"><div class="lbox"><div id="llogo"></div><h1 id="lname">⛪ حسابات الكنيسة</h1><div id="lmsg" class="lmsg"></div><div id="lform"><input id="un" placeholder="اسم المستخدم" style="display:none"><input id="em" type="email" inputmode="email" autocomplete="username" placeholder="البريد الإلكتروني" dir="ltr"><input id="pw" type="password" autocomplete="current-password" placeholder="كلمة المرور" dir="ltr"><button class="btn lbtn" id="lgo" onclick="doAuth()">دخول</button><a href="#" id="lsw" onclick="swAuth();return false">مستخدم جديد؟ إنشاء حساب</a></div></div></div><div id="lfoot">الابشربل</div></div>
+<div id="lock"><div class="lbox"><div id="llogo"></div><h1 id="lname">⛪ حسابات الكنيسة</h1><div id="lmsg" class="lmsg"></div><div id="lform"><input id="un" placeholder="اسم المستخدم" style="display:none"><input id="em" type="email" inputmode="email" autocomplete="username" placeholder="البريد الإلكتروني" dir="ltr"><input id="pw" type="password" autocomplete="current-password" placeholder="كلمة المرور" dir="ltr"><button class="btn lbtn" id="lgo" onclick="doAuth()">دخول</button><a href="#" id="lsw" onclick="swAuth();return false">مستخدم جديد؟ إنشاء حساب</a></div></div></div><div id="lfoot">الأب شربل</div></div>
 <div class="app">
 <nav id="nav"></nav>
 <main id="main"></main>
@@ -128,7 +128,7 @@ main>*{animation:fade .35s ease both}main>*:nth-child(2){animation-delay:.04s}ma
 const SB=supabase.createClient('https://eeaalajfycetfjccfute.supabase.co','sb_publishable_CYTXG2LLcWkEbcj4rf7ECw_3ftETaOq');
 const LOGOH=l=>l?'<img src="'+l+'" style="width:34px;height:34px;border-radius:8px;object-fit:cover">':'⛪';
 function cacheBrand(){try{localStorage.setItem('brand',JSON.stringify({c:D.church,l:D.logo||'',f:D.footer||''}))}catch(e){}}
-function loginBrand(){try{const b=JSON.parse(localStorage.getItem('brand')||'null');if(b){$('#lname').textContent=b.c;$('#lfoot').textContent=b.f!=null?b.f:'الابشربل';if(b.l)$('#llogo').innerHTML='<img src="'+b.l+'" style="width:84px;height:84px;border-radius:18px;object-fit:cover">'}}catch(e){}}
+function loginBrand(){try{const b=JSON.parse(localStorage.getItem('brand')||'null');if(b){$('#lname').textContent=b.c;$('#lfoot').textContent=b.f!=null?b.f:'الأب شربل';if(b.l)$('#llogo').innerHTML='<img src="'+b.l+'" style="width:84px;height:84px;border-radius:18px;object-fit:cover">'}}catch(e){}}
 const UNAME=()=>(ME&&ME.user_metadata&&ME.user_metadata.name)||'';
 function resizeImg(f,max,cb,q){const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));const c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',q||.85))};i.src=r.result};r.readAsDataURL(f)}
 function setLogo(f){if(f)resizeImg(f,256,d=>{D.logo=d;save();cacheBrand();set()})}
@@ -142,7 +142,7 @@ const today=()=>lc(new Date());
 const DEF={church:'الكنيسة',cur:'ج.م',pin:'',
  wallets:[{id:'w1',name:'الخزنة',open:0},{id:'w2',name:'البنك',open:0},{id:'w3',name:'فودافون كاش',open:0}],
  cats:{in:['عشور','تقدمات','تبرعات','اشتراكات','نذور','كشافة وخدمات','إيرادات أخرى'],out:['مرتبات','كهرباء ومياه','صيانة','مساعدات اجتماعية','اشتراكات','خدمات ورحلات','مصروفات إدارية','مصروفات أخرى']},
- people:[],tx:[],budget:{},funds:[],lockedUntil:'',lowCash:0,subGrace:7,pledges:[],rec:[],recSkip:[],footer:'الابشربل'};
+ people:[],tx:[],budget:{},funds:[],lockedUntil:'',lowCash:0,subGrace:7,pledges:[],rec:[],recSkip:[],footer:'الأب شربل'};
 let D=JSON.parse(JSON.stringify(DEF));let view='home';let flt={m:today().slice(0,7),q:'',t:'',c:''};
 let saveT=null;
 function save(){if(!CANW())return;clearTimeout(saveT);saveT=setTimeout(pushSettings,400)}
@@ -168,7 +168,11 @@ const wname=id=>(D.wallets.find(w=>w.id===id)||{name:'—'}).name;
 const pname=id=>(D.people.find(p=>p.id===id)||{name:''}).name;
 const MN=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 const mlabel=m=>MN[+m.slice(5,7)-1]+' '+m.slice(0,4);
-const NAV=[['home','🏠','الرئيسية'],['tx','📒','الحركات'],['rep','📊','التقارير'],['ppl','👥','الأعضاء'],['sub','✅','اشتراكات'],['set','⚙️','الإعدادات']];
+const GUIDE=[["➕ إزاي أضيف حركة (إيراد أو مصروف)", ["افتح صفحة 📒 الحركات.", "دوس على زرار الإضافة (حركة جديدة).", "اختار النوع: إيراد أو مصروف.", "اكتب المبلغ والتاريخ والتصنيف واختار الحساب (خزنة / فودافون كاش / بنك).", "اكتب رقم الإيصال لو في، وممكن تصوّر الإيصال وتضيفه.", "دوس حفظ. التعديل أو الحذف من نفس القائمة."]], ["✅ الاشتراكات الشهرية", ["افتح صفحة ✅ اشتراكات واختار الشهر.", "لكل عضو تقدر تحدد مبلغ مختلف، أو دوس 'تحديد الكل' للمبلغ الافتراضي.", "اختار الحساب اللي هتدخل فيه الفلوس.", "بعد التسجيل، المبلغ بينزل إيراد تلقائي في الحركات.", "متابعة السنة كلها: زرار 🗓 شبكة السنة (دوس على الخانة للتسجيل أو الإلغاء)."]], ["🧾 الإيصالات", ["من 📒 الحركات، جنب أي إيراد زرار 🧾 إيصال.", "هيفتح صورة الإيصال برقم وشعار الكنيسة.", "دوس 'مشاركة' واختار واتساب، أو 'حفظ صورة'."]], ["🤝 النذور والتعهدات", ["من صفحة التقارير دوس 🤝 النذور والتعهدات.", "أضف العضو والمبلغ المتعهد به وتاريخ البداية.", "المدفوع والمتبقي بيتحسبوا لوحدهم من الإيرادات المسجلة للعضو، من غير تسجيل مرتين."]], ["⏰ المتأخرات وكشف حساب عضو", ["من التقارير دوس ⏰ المتأخرات وكشف الحساب.", "هتشوف مين متأخر في الاشتراك وكام شهر.", "دوس على اسم العضو لكشف حسابه، وتقدر تطبعه."]], ["🏷️ الصناديق والأغراض", ["من ⚙️ الإعدادات ← الصناديق / الأغراض.", "أضف صندوق (مثلًا: بناء، رحلة).", "وانت بتسجل الحركة اختار الصندوق، وأرصدتهم بتظهر في الرئيسية."]], ["📊 التقارير", ["صفحة 📊 التقارير فيها كشف حساب بالفترة، حسب التصنيف، شهر بشهر.", "📅 التقرير السنوي لكل السنة.", "في زرار طباعة، وتصدير CSV يفتح في إكسل."]], ["🔁 المصروفات المتكررة", ["من الإعدادات ← 🔁 مصروفات متكررة.", "أضف الاسم والمبلغ والتصنيف والحساب ويوم الشهر (من 1 لـ 28).", "بتتسجل تلقائي مرة كل شهر أول ما حد يفتح التطبيق بعد اليوم ده."]], ["👥 الأعضاء", ["من 👥 الأعضاء أضف الأسماء والمتبرعين.", "تقدر تعدّل أو تحذف أي عضو."]], ["🔐 المستخدمون والصلاحيات", ["الأول واحد يسجّل بالتطبيق بيبقى المدير.", "المدير: كل حاجة. أمين الصندوق: يسجل ويعدّل. مشاهدة فقط: يشوف بس.", "من الإعدادات ← المستخدمون والصلاحيات تغيّر الصلاحية أو تشيل مستخدم."]], ["🔒 قفل الشهور", ["من الإعدادات ← التنبيه وقفل الشهور.", "اختار آخر شهر عايز تقفله (شامل).", "الشهور المقفولة ما ينفعش تتعدل أو تتحذف فيها حركات، عشان الحسابات اللي اتراجعت ما تتغيرش."]], ["💾 النسخ الاحتياطي", ["من الإعدادات ← نسخة احتياطية: حمّل نسخة على جهازك.", "في كمان نسخ تلقائية على السيرفر كل أسبوع.", "احتفظ بنسخة على جهازك من وقت للتاني."]], ["🔔 التنبيهات", ["من الإعدادات فعّل الإشعارات.", "التنبيه بيظهر لما تفتح التطبيق (مرة في اليوم) لو في أعضاء متأخرين.", "التنبيه مش بيرن والتطبيق مقفول."]], ["🎨 الاسم والشعار والسطر الأخير", ["من الإعدادات غيّر اسم الكنيسة والشعار والعملة.", "السطر اللي في آخر الصفحة بيتغير من نفس المكان."]], ["📱 تثبيته على الموبايل", ["افتح الرابط في كروم.", "القائمة (⋮) ← إضافة إلى الشاشة الرئيسية.", "هيشتغل زي أي تطبيق، وبنفس الإيميل على الكمبيوتر."]], ["📊 ربط جوجل شيت", ["من الإعدادات ← ربط جوجل شيت، فيه الخطوات والسكريبت."]]];
+function gd(q){q=(q||'').trim();const L=GUIDE.filter(g=>!q||(g[0]+' '+g[1].join(' ')).includes(q));$('#main').innerHTML='<h2>📖 دليل الاستخدام</h2><input id="gq" placeholder="🔍 دوّر في الدليل..." value="'+esc(q)+'" oninput="gdq(this.value)" style="margin-bottom:12px"><div id="gl">'+gdl(L)+'</div>'}
+function gdl(L){return L.length?L.map(g=>'<details class="card" style="margin-bottom:10px"><summary style="cursor:pointer;font-weight:700">'+g[0]+'</summary><ol style="line-height:2;padding-inline-start:22px;margin:8px 0 0">'+g[1].map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol></details>').join(''):'<div class="card">مفيش نتيجة</div>'}
+function gdq(q){q=q.trim();$('#gl').innerHTML=gdl(GUIDE.filter(g=>!q||(g[0]+' '+g[1].join(' ')).includes(q)))}
+const NAV=[['home','🏠','الرئيسية'],['tx','📒','الحركات'],['rep','📊','التقارير'],['ppl','👥','الأعضاء'],['sub','✅','اشتراكات'],['gd','📖','الدليل'],['set','⚙️','الإعدادات']];
 function walletBal(w){return w.open+D.tx.reduce((a,t)=>{if(t.type==='in'&&t.w===w.id)return a+t.amt;if(t.type==='out'&&t.w===w.id)return a-t.amt;if(t.type==='tr'){if(t.w===w.id)a-=t.amt;if(t.w2===w.id)a+=t.amt}return a},0)}
 function sum(list,type){return list.filter(t=>t.type===type).reduce((a,t)=>a+t.amt,0)}
 function nav(){
@@ -176,7 +180,7 @@ function nav(){
  $('#tabs').innerHTML=NAV.map(n=>`<button class="${view===n[0]?'on':''}" onclick="go('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join('');
 }
 function go(v){view=v;render();scrollTo(0,0)}
-function render(){nav();setTimeout(()=>{if(D.footer&&!$('#foot')){const f=document.createElement('div');f.id='foot';f.className='';f.textContent=D.footer;$('#main').appendChild(f)}},0);({home,tx,rep,ppl,sub,set,arr,stm,yr,gsh,grid,pld,rcr})[view]()}
+function render(){nav();setTimeout(()=>{if(D.footer&&!$('#foot')){const f=document.createElement('div');f.id='foot';f.className='';f.textContent=D.footer;$('#main').appendChild(f)}},0);({gd,home,tx,rep,ppl,sub,set,arr,stm,yr,gsh,grid,pld,rcr})[view]()}
 
 function home(){
  const m=today().slice(0,7);const mt=D.tx.filter(t=>t.date.startsWith(m));
