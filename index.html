@@ -93,13 +93,13 @@ const CANW=()=>ROLE==='admin'||ROLE==='treasurer';
 const lc=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const today=()=>lc(new Date());
 const DEF={church:'الكنيسة',cur:'ج.م',pin:'',
- wallets:[{id:'w1',name:'الخزنة',open:0},{id:'w2',name:'البنك',open:0}],
+ wallets:[{id:'w1',name:'الخزنة',open:0},{id:'w2',name:'البنك',open:0},{id:'w3',name:'فودافون كاش',open:0}],
  cats:{in:['عشور','تقدمات','تبرعات','اشتراكات','نذور','كشافة وخدمات','إيرادات أخرى'],out:['مرتبات','كهرباء ومياه','صيانة','مساعدات اجتماعية','اشتراكات','خدمات ورحلات','مصروفات إدارية','مصروفات أخرى']},
- people:[],tx:[],budget:{},funds:[],lockedUntil:'',lowCash:0};
+ people:[],tx:[],budget:{},funds:[],lockedUntil:'',lowCash:0,subGrace:7};
 let D=JSON.parse(JSON.stringify(DEF));let view='home';let flt={m:today().slice(0,7),q:'',t:'',c:''};
 let saveT=null;
 function save(){if(!CANW())return;clearTimeout(saveT);saveT=setTimeout(pushSettings,400)}
-async function pushSettings(){const {church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom,funds,lockedUntil,lowCash}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom,funds,lockedUntil,lowCash},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
+async function pushSettings(){const {church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom,funds,lockedUntil,lowCash,subGrace,m2,subW}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom,funds,lockedUntil,lowCash,subGrace,m2,subW},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
 function toast(m){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:84px;right:50%;transform:translateX(50%);background:#1b2430;color:#fff;padding:10px 16px;border-radius:10px;z-index:200;font-size:14px';document.body.appendChild(t)}t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',3500)}
 const toRow=t=>({id:t.id,type:t.type,date:t.date,amt:t.amt,w:t.w||null,w2:t.w2||null,cat:t.cat||null,note:t.note||null,p:t.p||null,rcpt:t.rcpt||null,fund:t.fund||null,...(('img' in t)?{img:t.img}:{}),updated_at:new Date().toISOString()});
 const fromRow=r=>({id:r.id,type:r.type,date:r.date,amt:Number(r.amt),w:r.w,w2:r.w2,cat:r.cat||'',note:r.note||'',p:r.p||'',rcpt:r.rcpt||'',fund:r.fund||'',hasimg:!!r.hasimg,ts:Date.parse(r.updated_at)||0});
@@ -109,6 +109,7 @@ async function loadAll(){
  if(s.error||t.error){toast('تعذر تحميل البيانات');return}
  if(s.data&&s.data.data)D=Object.assign(JSON.parse(JSON.stringify(DEF)),s.data.data);else if(ROLE==='admin'){D=JSON.parse(JSON.stringify(DEF));await pushSettings()}
  D.tx=t.data.map(fromRow);
+ if(!D.m2){D.m2=1;if(!D.wallets.some(w=>w.name.includes('فودافون')))D.wallets.push({id:'w3',name:'فودافون كاش',open:0});if(CANW())pushSettings()}
  if(!D.m1){D.m1=1;['in','out'].forEach(k=>{if(!D.cats[k].includes('اشتراكات'))D.cats[k].push('اشتراكات')});if(CANW())pushSettings()}
 }
 const $=s=>document.querySelector(s);
@@ -221,6 +222,7 @@ function sub(){
  <div class="card"><div class="f">
  <div><label>نوع الاشتراك</label><select id="sb_mode" onchange="subMode=this.value;sub()"><option value="m" ${subMode==='m'?'selected':''}>شهري</option><option value="y" ${subMode==='y'?'selected':''}>سنوي</option></select></div>
  <div><label>${subMode==='m'?'الشهر':'السنة'}</label>${subMode==='m'?`<input id="sb_p" type="month" value="${subM}" onchange="subM=this.value||subM;sub()">`:`<input id="sb_p" type="number" value="${subY}" onchange="subY=this.value||subY;sub()">`}</div>
+ <div><label>استلام الاشتراك في حساب</label><select onchange="D.subW=this.value;save();sub()">${D.wallets.map(w=>`<option value="${w.id}" ${subWallet()===w.id?'selected':''}>${esc(w.name)}</option>`).join('')}</select></div>
  <div><label>قيمة الاشتراك للفرد</label><input id="sb_amt" type="number" value="${amt||''}" placeholder="0" onchange="subAmtSet(this.value)" class="wr"></div></div></div>
  <div class="row" style="margin-top:12px"><span class="card" style="padding:8px 14px">دفعوا: <b>${n}</b> من ${D.people.length}</span><span class="card" style="padding:8px 14px">لم يدفعوا: <b>${D.people.length-n}</b></span>${got?`<span class="card" style="padding:8px 14px">دخل الخزنة: <b>${fmt(got)}</b></span>`:''}</div>
  <div class="row"><button class="btn g" onclick="arY=subMode==='y'?subY:subM.slice(0,4);go('arr')">⏰ المتأخرات وكشف الحساب</button></div>
@@ -234,7 +236,7 @@ async function subPAmt(id,v){v=+v||0;const k=subKey(),tid='sub_'+k+'_'+id,ex=D.t
  else{D.subCustom=D.subCustom||{};D.subCustom[k]=D.subCustom[k]||{};if(v>0)D.subCustom[k][id]=v;else delete D.subCustom[k][id];await pushSettings()}
  sub()}
 async function subAll(on){if(!CANW())return;for(const p of D.people){const tid='sub_'+subKey()+'_'+p.id,has=D.tx.some(x=>x.id===tid);if(on&&!has){if(!(memAmt(p.id)>0)){toast('اكتب قيمة الاشتراك الأول');break}await subTick(p.id,true)}else if(!on&&has)await subTick(p.id,false)}sub()}
-function subWallet(){return (D.wallets.find(w=>w.name.includes('الخزنة'))||D.wallets[0]).id}
+function subWallet(){const c=D.wallets.find(w=>w.id===D.subW);if(c)return c.id;return (D.wallets.find(w=>w.name.includes('الخزنة'))||D.wallets[0]).id}
 async function subTick(id,v){if(!CANW())return;const k=subKey(),tid='sub_'+k+'_'+id,amt=memAmt(id);
  if(v){if(!(amt>0)){toast('اكتب قيمة الاشتراك الأول');sub();return}
   const cur=today(),d=(subMode==='m'?cur.slice(0,7)===k:cur.slice(0,4)===k)?cur:(subMode==='m'?k+'-01':k+'-01-01');
@@ -252,7 +254,7 @@ function pickImg(f){if(!f)return;resizeImg(f,900,d=>{window._img=d;window._imgSe
 async function viewImg(id){const {data,error}=await SB.from('tx').select('img').eq('id',id).maybeSingle();if(error||!data||!data.img){toast('تعذر تحميل الصورة');return}$('#box').innerHTML='<img src="'+data.img+'" style="max-width:100%;border-radius:10px"><div class="row" style="margin-top:12px"><button class="btn g" onclick="closeM()">إغلاق</button></div>';$('#modal').classList.add('on')}
 function alerts(){const a=[],m=today().slice(0,7);const cash=D.wallets.find(w=>w.name.includes('الخزنة'))||D.wallets[0];
  if(+D.lowCash>0&&walletBal(cash)<D.lowCash)a.push('⚠️ رصيد '+esc(cash.name)+' ('+fmt(walletBal(cash))+') أقل من الحد اللي حددته ('+fmt(D.lowCash)+')');
- const amt=+(D.subAmt&&D.subAmt.m)||0;if(D.people.length&&amt>0){const un=D.people.filter(p=>!D.tx.some(t=>t.id==='sub_'+m+'_'+p.id)).length;if(un)a.push('⏰ '+un+' عضو لم يدفعوا اشتراك '+mlabel(m)+' <a href="#" onclick="subMode=\'m\';subM=\''+m+'\';go(\'sub\');return false">عرض</a>')}
+ const lt=lateList();if(lt.length)a.push('⏰ '+lt.length+' عضو متأخر في الاشتراك: '+lt.slice(0,5).map(x=>esc(x.p.name)+(x.months.length>1?' ('+x.months.length+' شهور)':'')).join('، ')+(lt.length>5?' ...':'')+' <a href="#" onclick="go(\'arr\');return false">التفاصيل</a>')
  if(ROLE==='admin'){const pd=new Date();pd.setDate(1);pd.setMonth(pd.getMonth()-1);const pm=lc(pd).slice(0,7);if(D.tx.some(t=>t.date.startsWith(pm))&&(!D.lockedUntil||D.lockedUntil<pm))a.push('🔒 فكّر تقفل شهر '+mlabel(pm)+' بعد المراجعة (الإعدادات)')}
  return a.length?'<div class="card" style="margin:12px 0;background:#fff8e6;border-color:#f0d9a0;line-height:2">'+a.join('<br>')+'</div>':''}
 let arY=today().slice(0,4),stmId='';
@@ -277,6 +279,13 @@ async function loadBackups(){const el=$('#bks');if(!el)return;const {data,error}
 async function bkNow(){const {error}=await SB.rpc('make_backup');toast(error?'تعذر النسخ':'تم أخذ نسخة');loadBackups()}
 async function bkDl(id){const {data,error}=await SB.from('backups').select('ts,data').eq('id',id).maybeSingle();if(error||!data){toast('تعذر التنزيل');return}const o=Object.assign({},data.data.settings||{},{tx:(data.data.tx||[]).map(fromRow)});dl('church-server-backup-'+data.ts.slice(0,10)+'.json',JSON.stringify(o),'application/json')}
 async function autoBackup(){if(ROLE!=='admin')return;const {data}=await SB.from('backups').select('ts').order('id',{ascending:false}).limit(1);if(!data||!data.length||Date.now()-Date.parse(data[0].ts)>7*864e5)await SB.rpc('make_backup')}
+function lateList(){const g=+D.subGrace||0,amt=+(D.subAmt&&D.subAmt.m)||0,t=today();const out=[];if(!D.people.length)return out;
+ const ms=arMonths(t.slice(0,4)).filter(k=>{const d=new Date(k+'-01T12:00:00');d.setDate(d.getDate()+g);return lc(d)<=t});
+ D.people.forEach(p=>{const m=ms.filter(k=>!D.tx.some(x=>x.id==='sub_'+k+'_'+p.id)&&amtFor(k,p.id)>0);if(m.length)out.push({p,months:m})});return out}
+function notifOn(){return typeof Notification!=='undefined'&&Notification.permission==='granted'&&localStorage.getItem('notif')==='1'}
+async function enableNotif(){if(typeof Notification==='undefined'){alert('المتصفح ده مش بيدعم الإشعارات');return}const r=await Notification.requestPermission();if(r==='granted'){localStorage.setItem('notif','1');toast('تم تفعيل الإشعارات على الجهاز ده');notifyLate(true)}else alert('الإشعارات مرفوضة. فعّلها من إعدادات الموقع في المتصفح.');set()}
+function disableNotif(){localStorage.removeItem('notif');set()}
+async function notifyLate(force){try{if(!notifOn())return;const t=today();if(!force&&localStorage.getItem('nt')===t)return;const lt=lateList();if(!lt.length)return;localStorage.setItem('nt',t);const reg=await navigator.serviceWorker.ready;reg.showNotification(D.church+': أعضاء متأخرين في الاشتراك',{body:lt.length+' عضو: '+lt.slice(0,4).map(x=>x.p.name).join('، ')+(lt.length>4?' ...':''),icon:'icon.svg',tag:'late'})}catch(e){}}
 function addP(){const n=$('#np').value.trim();if(!n)return;D.people.push({id:uid(),name:n,phone:$('#nph').value.trim()});save();ppl()}
 function delP(id){if(confirm('حذف الاسم؟ الحركات المرتبطة هتفضل موجودة.')){D.people=D.people.filter(p=>p.id!==id);save();ppl()}}
 
@@ -288,7 +297,7 @@ function set(){setTimeout(()=>{loadUsers();loadAudit();loadBackups()},0);
  <h3>الحسابات (خزنة / بنك)</h3><div class="card">${D.wallets.map(w=>`<div class="row"><input value="${esc(w.name)}" onchange="wUp('${w.id}','name',this.value)" style="max-width:200px"><input type="number" value="${w.open}" onchange="wUp('${w.id}','open',+this.value)" style="max-width:160px" title="رصيد افتتاحي"><small style="color:var(--mu)">رصيد افتتاحي</small>${D.wallets.length>1?`<button class="btn g s" onclick="wDel('${w.id}')">حذف</button>`:''}</div>`).join('')}<button class="btn g" onclick="D.wallets.push({id:uid(),name:'حساب جديد',open:0});save();set()">＋ حساب</button></div>
  ${['in','out'].map(k=>`<h3>تصنيفات ${k==='in'?'الإيرادات':'المصروفات'}</h3><div class="card"><div class="row">${D.cats[k].map((c,i)=>`<span class="tag">${esc(c)} <a href="#" onclick="cDel('${k}',${i});return false">✕</a></span>`).join('')}</div><div class="row"><input id="nc_${k}" placeholder="تصنيف جديد" style="max-width:220px"><button class="btn g" onclick="cAdd('${k}')">إضافة</button></div></div>`).join('')}
  <h3>الصناديق / الأغراض</h3><div class="card"><div class="row">${(D.funds||[]).map((f,i)=>`<span class="tag">${esc(f)} <a href="#" onclick="fDel(${i});return false">✕</a></span>`).join('')||'<span style="color:var(--mu)">مفيش صناديق. أضف مثلًا: بناء، خدمة، رحلات</span>'}</div><div class="row"><input id="nf" placeholder="صندوق جديد" style="max-width:220px"><button class="btn g" onclick="fAdd()">إضافة</button></div></div>
- <h3>التنبيه وقفل الشهور</h3><div class="card"><div class="f"><div><label>نبّهني لو رصيد الخزنة أقل من</label><input type="number" value="${D.lowCash||''}" onchange="D.lowCash=+this.value;save()"></div>${ROLE==='admin'?`<div><label>قفل كل الشهور حتى (شامل)</label><input type="month" value="${D.lockedUntil||''}" onchange="setLock(this.value)"></div>`:''}</div><small style="color:var(--mu)">الشهر المقفول ما ينفعش إضافة أو تعديل أو مسح حركات فيه (حتى من السيرفر). المدير بس يفتحه.</small></div>
+ <h3>التنبيه وقفل الشهور</h3><div class="card"><div class="f"><div><label>اعتبر العضو متأخر بعد كام يوم من أول الشهر</label><input type="number" min="0" list="gr" value="${D.subGrace==null?7:D.subGrace}" onchange="D.subGrace=+this.value;save()"><datalist id="gr"><option value="3"><option value="7"><option value="15"><option value="30"></datalist></div><div><label>نبّهني لو رصيد الخزنة أقل من</label><input type="number" value="${D.lowCash||''}" onchange="D.lowCash=+this.value;save()"></div>${ROLE==='admin'?`<div><label>قفل كل الشهور حتى (شامل)</label><input type="month" value="${D.lockedUntil||''}" onchange="setLock(this.value)"></div>`:''}</div><div class="row" style="margin-top:10px">${notifOn()?'<span>🔔 إشعارات التليفون مفعّلة على الجهاز ده</span><button class="btn g s" onclick="disableNotif()">إيقاف</button>':'<button class="btn g" onclick="enableNotif()">🔔 تفعيل إشعارات المتأخرين على الجهاز ده</button>'}</div><small style="color:var(--mu)">الإشعار بيظهر مرة في اليوم لما تفتح التطبيق. الشهر المقفول ما ينفعش إضافة أو تعديل أو مسح حركات فيه (حتى من السيرفر). المدير بس يفتحه.</small></div>
  <h3>الميزانية الشهرية للمصروفات</h3><div class="card"><div class="f">${D.cats.out.map(c=>`<div><label>${esc(c)}</label><input type="number" value="${D.budget[c]||''}" onchange="D.budget[${JSON.stringify(c).replace(/"/g,'&quot;')}]=+this.value;save()"></div>`).join('')}</div></div>
  ${ROLE==='admin'?'<h3>المستخدمون والصلاحيات</h3><div class="card" id="users">جاري التحميل...</div>':''}
  ${ROLE==='admin'?'<h3>سجل المراجعة (آخر ١٠٠ عملية)</h3><div class="card" id="audit">جاري التحميل...</div><h3>نسخ احتياطية تلقائية على السيرفر</h3><div class="card" id="bks">جاري التحميل...</div>':''}
@@ -323,7 +332,7 @@ async function boot(){
  ME=data.session.user;ROLE=await getRole();
  if(ROLE==='pending'||ROLE==='none'){$('#lock').style.display='flex';$('#lform').innerHTML='<div style="color:#fff;line-height:1.8">تم تسجيل حسابك ('+esc(ME.email)+').<br>في انتظار موافقة مدير النظام.</div><button class="btn lbtn" onclick="boot()">تحديث</button><a href="#" onclick="logout();return false">خروج</a>';return}
  $('#lock').style.display='none';document.body.classList.toggle('ro',!CANW());
- await loadAll();cacheBrand();render();autoBackup();
+ await loadAll();cacheBrand();render();autoBackup();notifyLate();
 }
 async function refresh(){if(!ME||!CANW()&&ROLE!=='viewer')return;if($('#modal').classList.contains('on'))return;const ae=document.activeElement;if(ae&&/INPUT|SELECT|TEXTAREA/.test(ae.tagName)&&ae.id!=='')return;await loadAll();render()}
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
