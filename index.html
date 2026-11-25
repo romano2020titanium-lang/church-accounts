@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1e3a5f">
 <title>حسابات الكنيسة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -65,10 +66,56 @@ th{background:#f0f3f8;color:var(--mu);font-weight:600}
 .lbox a{color:#cfdcf0;font-size:14px}.lmsg{min-height:20px;font-size:14px;color:#ffd7d2}
 #lform{display:flex;flex-direction:column;gap:12px}
 body.ro .fab,body.ro .wr{display:none!important}
+
+/* ---- polish ---- */
+:root{--p:#1b365d;--p2:#2c5282;--gold:#c9a227;--bg:#f4f1ea;--bd:#e6e1d6;--sh:0 2px 10px rgba(27,54,93,.07)}
+body{font-family:"Cairo","Tajawal","Segoe UI",Tahoma,"Noto Naskh Arabic",Arial,sans-serif;background:var(--bg) radial-gradient(1200px 400px at 100% -10%,rgba(201,162,39,.10),transparent 60%);line-height:1.6}
+nav{background:linear-gradient(180deg,#1b365d 0%,#13294a 100%);box-shadow:-2px 0 14px rgba(0,0,0,.12)}
+nav h1{padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid rgba(201,162,39,.45)}
+nav button{transition:background .2s,color .2s,transform .15s;border-right:3px solid transparent}
+nav button:hover{transform:translateX(-2px)}
+nav button.on{background:rgba(255,255,255,.12);border-right-color:var(--gold)}
+h2{font-weight:700;color:var(--p);letter-spacing:.2px}
+h3{color:var(--p);font-weight:700}
+.card{border-radius:16px;box-shadow:var(--sh);transition:box-shadow .25s,transform .25s}
+.stat{position:relative;overflow:hidden}
+.stat:before{content:"";position:absolute;top:0;right:0;left:0;height:3px;background:linear-gradient(90deg,var(--gold),transparent)}
+.stat:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(27,54,93,.12)}
+.btn{border-radius:12px;font-weight:600;box-shadow:0 1px 3px rgba(27,54,93,.18);transition:transform .12s,filter .2s,box-shadow .2s}
+.btn:hover{filter:brightness(1.08);box-shadow:0 4px 12px rgba(27,54,93,.22)}
+.btn:active{transform:scale(.97)}
+.btn.g{box-shadow:none}
+input,select,textarea{border-radius:12px;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.2)}
+th{background:#f1ede2;color:var(--p)}
+tr{transition:background .15s}tbody tr:hover td,table tr:hover td{background:#faf8f2}
+.tw{border-radius:14px;box-shadow:var(--sh)}
+.tag{background:#efe7cf;color:#6b5410}
+.bar{height:9px}.bar i{background:linear-gradient(90deg,var(--p2),#4a78b5)}
+.modal{backdrop-filter:blur(3px)}.modal.on .box{animation:pop .22s ease}
+.box{border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+main>*{animation:fade .35s ease both}main>*:nth-child(2){animation-delay:.04s}main>*:nth-child(3){animation-delay:.08s}main>*:nth-child(4){animation-delay:.12s}
+#lock{background:radial-gradient(900px 500px at 50% 0%,#2f5a93 0%,transparent 70%),linear-gradient(160deg,#1b365d,#0f2240)}
+#lock:before{content:"\271D";position:absolute;font-size:520px;color:rgba(201,162,39,.07);line-height:1;pointer-events:none;top:50%;left:50%;transform:translate(-50%,-52%)}
+.lbox{position:relative;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:24px;backdrop-filter:blur(8px);padding:28px 22px;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:pop .5s ease}
+.lbox h1{margin:4px 0 8px;font-size:26px}
+#llogo:empty:before{content:"\26EA";font-size:54px;display:block;filter:drop-shadow(0 2px 6px rgba(0,0,0,.3))}
+.lbtn{background:linear-gradient(180deg,#e6c24f,#c9a227)!important;color:#1b2a45!important;border-radius:12px}
+#foot,#lfoot{text-align:center;color:var(--mu);font-size:13px;padding:22px 10px 6px;margin-top:26px;position:relative}
+#foot:before,#lfoot:before{content:"\2726";display:block;color:var(--gold);font-size:14px;margin-bottom:6px;letter-spacing:6px}
+#lfoot{color:#cfdcf0;position:absolute;bottom:18px;left:0;right:0;margin:0}
+.tabs{background:linear-gradient(180deg,#1b365d,#13294a);box-shadow:0 -4px 16px rgba(0,0,0,.18)}
+.tabs button{transition:color .2s,transform .15s;position:relative}
+.tabs button.on:before{content:"";position:absolute;top:-4px;width:26px;height:3px;border-radius:3px;background:var(--gold)}
+@media(max-width:800px){main>*{animation-duration:.25s}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{#foot:before{display:none}}
 </style>
 </head>
 <body>
-<div id="lock"><div class="lbox"><div id="llogo"></div><h1 id="lname">⛪ حسابات الكنيسة</h1><div id="lmsg" class="lmsg"></div><div id="lform"><input id="un" placeholder="اسم المستخدم" style="display:none"><input id="em" type="email" inputmode="email" autocomplete="username" placeholder="البريد الإلكتروني" dir="ltr"><input id="pw" type="password" autocomplete="current-password" placeholder="كلمة المرور" dir="ltr"><button class="btn lbtn" id="lgo" onclick="doAuth()">دخول</button><a href="#" id="lsw" onclick="swAuth();return false">مستخدم جديد؟ إنشاء حساب</a></div></div></div></div>
+<div id="lock"><div class="lbox"><div id="llogo"></div><h1 id="lname">⛪ حسابات الكنيسة</h1><div id="lmsg" class="lmsg"></div><div id="lform"><input id="un" placeholder="اسم المستخدم" style="display:none"><input id="em" type="email" inputmode="email" autocomplete="username" placeholder="البريد الإلكتروني" dir="ltr"><input id="pw" type="password" autocomplete="current-password" placeholder="كلمة المرور" dir="ltr"><button class="btn lbtn" id="lgo" onclick="doAuth()">دخول</button><a href="#" id="lsw" onclick="swAuth();return false">مستخدم جديد؟ إنشاء حساب</a></div></div></div><div id="lfoot">الابشربل</div></div>
 <div class="app">
 <nav id="nav"></nav>
 <main id="main"></main>
@@ -80,8 +127,8 @@ body.ro .fab,body.ro .wr{display:none!important}
 <script>
 const SB=supabase.createClient('https://eeaalajfycetfjccfute.supabase.co','sb_publishable_CYTXG2LLcWkEbcj4rf7ECw_3ftETaOq');
 const LOGOH=l=>l?'<img src="'+l+'" style="width:34px;height:34px;border-radius:8px;object-fit:cover">':'⛪';
-function cacheBrand(){try{localStorage.setItem('brand',JSON.stringify({c:D.church,l:D.logo||''}))}catch(e){}}
-function loginBrand(){try{const b=JSON.parse(localStorage.getItem('brand')||'null');if(b){$('#lname').textContent=b.c;if(b.l)$('#llogo').innerHTML='<img src="'+b.l+'" style="width:84px;height:84px;border-radius:18px;object-fit:cover">'}}catch(e){}}
+function cacheBrand(){try{localStorage.setItem('brand',JSON.stringify({c:D.church,l:D.logo||'',f:D.footer||''}))}catch(e){}}
+function loginBrand(){try{const b=JSON.parse(localStorage.getItem('brand')||'null');if(b){$('#lname').textContent=b.c;$('#lfoot').textContent=b.f!=null?b.f:'الابشربل';if(b.l)$('#llogo').innerHTML='<img src="'+b.l+'" style="width:84px;height:84px;border-radius:18px;object-fit:cover">'}}catch(e){}}
 const UNAME=()=>(ME&&ME.user_metadata&&ME.user_metadata.name)||'';
 function resizeImg(f,max,cb,q){const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));const c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',q||.85))};i.src=r.result};r.readAsDataURL(f)}
 function setLogo(f){if(f)resizeImg(f,256,d=>{D.logo=d;save();cacheBrand();set()})}
@@ -95,11 +142,11 @@ const today=()=>lc(new Date());
 const DEF={church:'الكنيسة',cur:'ج.م',pin:'',
  wallets:[{id:'w1',name:'الخزنة',open:0},{id:'w2',name:'البنك',open:0},{id:'w3',name:'فودافون كاش',open:0}],
  cats:{in:['عشور','تقدمات','تبرعات','اشتراكات','نذور','كشافة وخدمات','إيرادات أخرى'],out:['مرتبات','كهرباء ومياه','صيانة','مساعدات اجتماعية','اشتراكات','خدمات ورحلات','مصروفات إدارية','مصروفات أخرى']},
- people:[],tx:[],budget:{},funds:[],lockedUntil:'',lowCash:0,subGrace:7,pledges:[],rec:[],recSkip:[]};
+ people:[],tx:[],budget:{},funds:[],lockedUntil:'',lowCash:0,subGrace:7,pledges:[],rec:[],recSkip:[],footer:'الابشربل'};
 let D=JSON.parse(JSON.stringify(DEF));let view='home';let flt={m:today().slice(0,7),q:'',t:'',c:''};
 let saveT=null;
 function save(){if(!CANW())return;clearTimeout(saveT);saveT=setTimeout(pushSettings,400)}
-async function pushSettings(){const {church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom,funds,lockedUntil,lowCash,subGrace,m2,subW,pledges,rec,recSkip}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom,funds,lockedUntil,lowCash,subGrace,m2,subW,pledges,rec,recSkip},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
+async function pushSettings(){const {church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom,funds,lockedUntil,lowCash,subGrace,m2,subW,pledges,rec,recSkip,footer}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom,funds,lockedUntil,lowCash,subGrace,m2,subW,pledges,rec,recSkip,footer},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
 function toast(m){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:84px;right:50%;transform:translateX(50%);background:#1b2430;color:#fff;padding:10px 16px;border-radius:10px;z-index:200;font-size:14px';document.body.appendChild(t)}t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',3500)}
 const toRow=t=>({id:t.id,type:t.type,date:t.date,amt:t.amt,w:t.w||null,w2:t.w2||null,cat:t.cat||null,note:t.note||null,p:t.p||null,rcpt:t.rcpt||null,fund:t.fund||null,...(('img' in t)?{img:t.img}:{}),updated_at:new Date().toISOString()});
 const fromRow=r=>({id:r.id,type:r.type,date:r.date,amt:Number(r.amt),w:r.w,w2:r.w2,cat:r.cat||'',note:r.note||'',p:r.p||'',rcpt:r.rcpt||'',fund:r.fund||'',hasimg:!!r.hasimg,ts:Date.parse(r.updated_at)||0});
@@ -129,7 +176,7 @@ function nav(){
  $('#tabs').innerHTML=NAV.map(n=>`<button class="${view===n[0]?'on':''}" onclick="go('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join('');
 }
 function go(v){view=v;render();scrollTo(0,0)}
-function render(){nav();({home,tx,rep,ppl,sub,set,arr,stm,yr,gsh,grid,pld,rcr})[view]()}
+function render(){nav();setTimeout(()=>{if(D.footer&&!$('#foot')){const f=document.createElement('div');f.id='foot';f.className='';f.textContent=D.footer;$('#main').appendChild(f)}},0);({home,tx,rep,ppl,sub,set,arr,stm,yr,gsh,grid,pld,rcr})[view]()}
 
 function home(){
  const m=today().slice(0,7);const mt=D.tx.filter(t=>t.date.startsWith(m));
@@ -338,7 +385,7 @@ function set(){setTimeout(()=>{loadUsers();loadAudit();loadBackups()},0);
  $('#main').innerHTML=`<h2>الإعدادات</h2>
  <div class="card"><div class="row" style="gap:12px;align-items:center"><div style="font-size:32px">${LOGOH(D.logo)}</div><label class="btn" style="cursor:pointer">🖼️ صورة / شعار الكنيسة<input type="file" accept="image/*" hidden onchange="setLogo(this.files[0])"></label>${D.logo?'<button class="btn" onclick="delLogo()">حذف الصورة</button>':''}</div></div>
  <div class="card"><div class="f"><div><label>اسمك (اسم المستخدم)</label><input id="s_un" value="${esc(UNAME())}"></div></div><div class="row" style="margin-top:12px"><button class="btn" onclick="saveName()">حفظ الاسم</button></div></div>
- <div class="card"><div class="f"><div><label>اسم الكنيسة</label><input id="s_ch" value="${esc(D.church)}"></div><div><label>العملة</label><input id="s_cur" value="${esc(D.cur)}"></div></div><div class="row" style="margin-top:12px"><button class="btn" onclick="saveS()">حفظ</button></div></div>
+ <div class="card"><div class="f"><div><label>اسم الكنيسة</label><input id="s_ch" value="${esc(D.church)}"></div><div><label>العملة</label><input id="s_cur" value="${esc(D.cur)}"></div><div><label>السطر اللي في آخر الصفحة</label><input id="s_ft" value="${esc(D.footer||'')}"></div></div><div class="row" style="margin-top:12px"><button class="btn" onclick="saveS()">حفظ</button></div></div>
  <h3>الحسابات (خزنة / بنك)</h3><div class="card">${D.wallets.map(w=>`<div class="row"><input value="${esc(w.name)}" onchange="wUp('${w.id}','name',this.value)" style="max-width:200px"><input type="number" value="${w.open}" onchange="wUp('${w.id}','open',+this.value)" style="max-width:160px" title="رصيد افتتاحي"><small style="color:var(--mu)">رصيد افتتاحي</small>${D.wallets.length>1?`<button class="btn g s" onclick="wDel('${w.id}')">حذف</button>`:''}</div>`).join('')}<button class="btn g" onclick="D.wallets.push({id:uid(),name:'حساب جديد',open:0});save();set()">＋ حساب</button></div>
  ${['in','out'].map(k=>`<h3>تصنيفات ${k==='in'?'الإيرادات':'المصروفات'}</h3><div class="card"><div class="row">${D.cats[k].map((c,i)=>`<span class="tag">${esc(c)} <a href="#" onclick="cDel('${k}',${i});return false">✕</a></span>`).join('')}</div><div class="row"><input id="nc_${k}" placeholder="تصنيف جديد" style="max-width:220px"><button class="btn g" onclick="cAdd('${k}')">إضافة</button></div></div>`).join('')}
  <h3>الصناديق / الأغراض</h3><div class="card"><div class="row">${(D.funds||[]).map((f,i)=>`<span class="tag">${esc(f)} <a href="#" onclick="fDel(${i});return false">✕</a></span>`).join('')||'<span style="color:var(--mu)">مفيش صناديق. أضف مثلًا: بناء، خدمة، رحلات</span>'}</div><div class="row"><input id="nf" placeholder="صندوق جديد" style="max-width:220px"><button class="btn g" onclick="fAdd()">إضافة</button></div></div>
@@ -353,7 +400,7 @@ function set(){setTimeout(()=>{loadUsers();loadAudit();loadBackups()},0);
 async function loadUsers(){const el=$('#users');if(!el)return;const {data,error}=await SB.from('members').select('*').order('created_at');if(error){el.textContent='تعذر التحميل';return}el.innerHTML='<div class="tw"><table><tr><th>البريد</th><th>الصلاحية</th><th></th></tr>'+data.map(u=>`<tr><td dir="ltr" style="text-align:right">${esc(u.email)}</td><td><select onchange="setRole('${u.user_id}',this.value)" ${u.user_id===ME.id?'disabled':''}>${[['pending','في الانتظار'],['viewer','مشاهدة فقط'],['treasurer','أمين صندوق'],['admin','مدير']].map(r=>`<option value="${r[0]}" ${u.role===r[0]?'selected':''}>${r[1]}</option>`).join('')}</select></td><td>${u.user_id===ME.id?'':`<button class="btn g s" onclick="rmUser('${u.user_id}')">حذف</button>`}</td></tr>`).join('')+'</table></div>'}
 async function setRole(id,r){const {error}=await SB.from('members').update({role:r}).eq('user_id',id);toast(error?'تعذر التعديل':'تم')}
 async function rmUser(id){if(confirm('إزالة المستخدم من النظام؟')){await SB.from('members').delete().eq('user_id',id);loadUsers()}}
-function saveS(){D.church=$('#s_ch').value||'الكنيسة';D.cur=$('#s_cur').value||'ج.م';save();cacheBrand();render()}
+function saveS(){D.church=$('#s_ch').value||'الكنيسة';D.cur=$('#s_cur').value||'ج.م';D.footer=$('#s_ft').value.trim();save();cacheBrand();render()}
 function wUp(id,k,v){D.wallets.find(w=>w.id===id)[k]=v;save()}
 function wDel(id){if(D.tx.some(t=>t.w===id||t.w2===id)){alert('الحساب عليه حركات ولا يمكن حذفه');return}D.wallets=D.wallets.filter(w=>w.id!==id);save();set()}
 function cAdd(k){const v=$('#nc_'+k).value.trim();if(v&&!D.cats[k].includes(v)){D.cats[k].push(v);save();set()}}
