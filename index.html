@@ -128,7 +128,7 @@ main>*{animation:fade .35s ease both}main>*:nth-child(2){animation-delay:.04s}ma
 const SB=supabase.createClient('https://eeaalajfycetfjccfute.supabase.co','sb_publishable_CYTXG2LLcWkEbcj4rf7ECw_3ftETaOq');
 const LOGOH=l=>l?'<img src="'+l+'" style="width:34px;height:34px;border-radius:8px;object-fit:cover">':'⛪';
 function cacheBrand(){try{localStorage.setItem('brand',JSON.stringify({c:D.church,l:D.logo||'',f:D.footer||''}))}catch(e){}}
-function loginBrand(){try{const b=JSON.parse(localStorage.getItem('brand')||'null');if(b){$('#lname').textContent=b.c;$('#lfoot').textContent=b.f!=null?b.f:'الأب شربل';if(b.l)$('#llogo').innerHTML='<img src="'+b.l+'" style="width:84px;height:84px;border-radius:18px;object-fit:cover">'}}catch(e){}}
+function loginBrand(){{const lf=$('#lfoot'),lk=$('#lock');if(lf&&lk&&lf.parentElement!==lk)lk.appendChild(lf)}try{const b=JSON.parse(localStorage.getItem('brand')||'null');if(b){$('#lname').textContent=b.c;$('#lfoot').textContent=b.f!=null?b.f:'الأب شربل';if(b.l)$('#llogo').innerHTML='<img src="'+b.l+'" style="width:84px;height:84px;border-radius:18px;object-fit:cover">'}}catch(e){}}
 const UNAME=()=>(ME&&ME.user_metadata&&ME.user_metadata.name)||'';
 function resizeImg(f,max,cb,q){const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));const c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',q||.85))};i.src=r.result};r.readAsDataURL(f)}
 function setLogo(f){if(f)resizeImg(f,256,d=>{D.logo=d;save();cacheBrand();set()})}
