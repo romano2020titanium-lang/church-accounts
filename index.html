@@ -99,7 +99,7 @@ const DEF={church:'الكنيسة',cur:'ج.م',pin:'',
 let D=JSON.parse(JSON.stringify(DEF));let view='home';let flt={m:today().slice(0,7),q:'',t:'',c:''};
 let saveT=null;
 function save(){if(!CANW())return;clearTimeout(saveT);saveT=setTimeout(pushSettings,400)}
-async function pushSettings(){const {church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
+async function pushSettings(){const {church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom}=D;const {error}=await SB.from('settings').upsert({id:1,data:{church,cur,wallets,cats,people,budget,logo,m1,subs,subAmt,subCustom},updated_at:new Date().toISOString()});if(error)toast('تعذر الحفظ: '+error.message)}
 function toast(m){let t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:84px;right:50%;transform:translateX(50%);background:#1b2430;color:#fff;padding:10px 16px;border-radius:10px;z-index:200;font-size:14px';document.body.appendChild(t)}t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',3500)}
 const toRow=t=>({id:t.id,type:t.type,date:t.date,amt:t.amt,w:t.w||null,w2:t.w2||null,cat:t.cat||null,note:t.note||null,p:t.p||null,updated_at:new Date().toISOString()});
 const fromRow=r=>({id:r.id,type:r.type,date:r.date,amt:Number(r.amt),w:r.w,w2:r.w2,cat:r.cat||'',note:r.note||'',p:r.p||'',ts:Date.parse(r.updated_at)||0});
@@ -216,11 +216,18 @@ function sub(){
  <div><label>${subMode==='m'?'الشهر':'السنة'}</label>${subMode==='m'?`<input id="sb_p" type="month" value="${subM}" onchange="subM=this.value||subM;sub()">`:`<input id="sb_p" type="number" value="${subY}" onchange="subY=this.value||subY;sub()">`}</div>
  <div><label>قيمة الاشتراك للفرد</label><input id="sb_amt" type="number" value="${amt||''}" placeholder="0" onchange="subAmtSet(this.value)" class="wr"></div></div></div>
  <div class="row" style="margin-top:12px"><span class="card" style="padding:8px 14px">دفعوا: <b>${n}</b> من ${D.people.length}</span><span class="card" style="padding:8px 14px">لم يدفعوا: <b>${D.people.length-n}</b></span>${got?`<span class="card" style="padding:8px 14px">دخل الخزنة: <b>${fmt(got)}</b></span>`:''}</div>
+ <div class="row wr"><button class="btn" onclick="subAll(true)">☑ تحديد الكل</button><button class="btn g" onclick="subAll(false)">إلغاء الكل</button></div>
  <div class="row wr"><input id="np" placeholder="إضافة عضو جديد" style="max-width:260px"><button class="btn" onclick="addP2()">إضافة</button></div>
- ${D.people.length?`<div class="tw"><table><tr><th style="width:60px">دفع</th><th>الاسم</th><th>التليفون</th></tr>${D.people.map(p=>`<tr><td><input type="checkbox" id="sbc_${p.id}" style="width:24px;height:24px" ${paid[p.id]?'checked':''} ${CANW()?'':'disabled'} onchange="subTick('${p.id}',this.checked)"></td><td>${esc(p.name)}</td><td>${esc(p.phone||'')}</td></tr>`).join('')}</table></div>`:'<div class="card" style="color:var(--mu);text-align:center">مفيش أعضاء لسه. أضف الأسماء من فوق.</div>'}`;
+ ${D.people.length?`<div class="tw"><table><tr><th style="width:60px">دفع</th><th>الاسم</th><th>المبلغ</th></tr>${D.people.map(p=>`<tr><td><input type="checkbox" id="sbc_${p.id}" style="width:24px;height:24px" ${paid[p.id]?'checked':''} ${CANW()?'':'disabled'} onchange="subTick('${p.id}',this.checked)"></td><td>${esc(p.name)}</td><td><input type="number" style="width:110px" value="${paid[p.id]?paid[p.id].amt:((D.subCustom&&D.subCustom[k]&&D.subCustom[k][p.id])||amt||'')}" ${CANW()?'':'disabled'} onchange="subPAmt('${p.id}',this.value)"></td></tr>`).join('')}</table></div>`:'<div class="card" style="color:var(--mu);text-align:center">مفيش أعضاء لسه. أضف الأسماء من فوق.</div>'}`;
 }
+function memAmt(id){const k=subKey();return +((D.subCustom&&D.subCustom[k]&&D.subCustom[k][id])||(D.subAmt&&D.subAmt[subMode])||0)}
+async function subPAmt(id,v){v=+v||0;const k=subKey(),tid='sub_'+k+'_'+id,ex=D.tx.find(x=>x.id===tid);
+ if(ex){if(!(v>0)){toast('المبلغ لازم يكون أكبر من صفر');sub();return}const t=Object.assign({},ex,{amt:v});if(await upsertTx(t))ex.amt=v}
+ else{D.subCustom=D.subCustom||{};D.subCustom[k]=D.subCustom[k]||{};if(v>0)D.subCustom[k][id]=v;else delete D.subCustom[k][id];await pushSettings()}
+ sub()}
+async function subAll(on){if(!CANW())return;for(const p of D.people){const tid='sub_'+subKey()+'_'+p.id,has=D.tx.some(x=>x.id===tid);if(on&&!has){if(!(memAmt(p.id)>0)){toast('اكتب قيمة الاشتراك الأول');break}await subTick(p.id,true)}else if(!on&&has)await subTick(p.id,false)}sub()}
 function subWallet(){return (D.wallets.find(w=>w.name.includes('الخزنة'))||D.wallets[0]).id}
-async function subTick(id,v){if(!CANW())return;const k=subKey(),tid='sub_'+k+'_'+id,amt=+(D.subAmt&&D.subAmt[subMode])||0;
+async function subTick(id,v){if(!CANW())return;const k=subKey(),tid='sub_'+k+'_'+id,amt=memAmt(id);
  if(v){if(!(amt>0)){toast('اكتب قيمة الاشتراك الأول');sub();return}
   const cur=today(),d=(subMode==='m'?cur.slice(0,7)===k:cur.slice(0,4)===k)?cur:(subMode==='m'?k+'-01':k+'-01-01');
   const t={id:tid,type:'in',date:d,amt:amt,w:subWallet(),w2:'',cat:'اشتراكات',note:'اشتراك '+(subMode==='m'?'شهر ':'سنة ')+k,p:id,ts:Date.now()};
