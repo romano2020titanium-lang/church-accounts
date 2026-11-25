@@ -222,14 +222,16 @@ function sub(){
  <div class="card"><div class="f">
  <div><label>نوع الاشتراك</label><select id="sb_mode" onchange="subMode=this.value;sub()"><option value="m" ${subMode==='m'?'selected':''}>شهري</option><option value="y" ${subMode==='y'?'selected':''}>سنوي</option></select></div>
  <div><label>${subMode==='m'?'الشهر':'السنة'}</label>${subMode==='m'?`<input id="sb_p" type="month" value="${subM}" onchange="subM=this.value||subM;sub()">`:`<input id="sb_p" type="number" value="${subY}" onchange="subY=this.value||subY;sub()">`}</div>
- <div><label>استلام الاشتراك في حساب</label><select onchange="D.subW=this.value;save();sub()">${D.wallets.map(w=>`<option value="${w.id}" ${subWallet()===w.id?'selected':''}>${esc(w.name)}</option>`).join('')}</select></div>
+ <div><label>الحساب الافتراضي للاستلام</label><select onchange="D.subW=this.value;save();sub()">${D.wallets.map(w=>`<option value="${w.id}" ${subWallet()===w.id?'selected':''}>${esc(w.name)}</option>`).join('')}</select></div>
  <div><label>قيمة الاشتراك للفرد</label><input id="sb_amt" type="number" value="${amt||''}" placeholder="0" onchange="subAmtSet(this.value)" class="wr"></div></div></div>
  <div class="row" style="margin-top:12px"><span class="card" style="padding:8px 14px">دفعوا: <b>${n}</b> من ${D.people.length}</span><span class="card" style="padding:8px 14px">لم يدفعوا: <b>${D.people.length-n}</b></span>${got?`<span class="card" style="padding:8px 14px">دخل الخزنة: <b>${fmt(got)}</b></span>`:''}</div>
  <div class="row"><button class="btn g" onclick="arY=subMode==='y'?subY:subM.slice(0,4);go('arr')">⏰ المتأخرات وكشف الحساب</button></div>
  <div class="row wr"><button class="btn" onclick="subAll(true)">☑ تحديد الكل</button><button class="btn g" onclick="subAll(false)">إلغاء الكل</button></div>
  <div class="row wr"><input id="np" placeholder="إضافة عضو جديد" style="max-width:260px"><button class="btn" onclick="addP2()">إضافة</button></div>
- ${D.people.length?`<div class="tw"><table><tr><th style="width:60px">دفع</th><th>الاسم</th><th>المبلغ</th></tr>${D.people.map(p=>`<tr><td><input type="checkbox" id="sbc_${p.id}" style="width:24px;height:24px" ${paid[p.id]?'checked':''} ${CANW()?'':'disabled'} onchange="subTick('${p.id}',this.checked)"></td><td>${esc(p.name)}</td><td><input type="number" style="width:110px" value="${paid[p.id]?paid[p.id].amt:((D.subCustom&&D.subCustom[k]&&D.subCustom[k][p.id])||amt||'')}" ${CANW()?'':'disabled'} onchange="subPAmt('${p.id}',this.value)"></td></tr>`).join('')}</table></div>`:'<div class="card" style="color:var(--mu);text-align:center">مفيش أعضاء لسه. أضف الأسماء من فوق.</div>'}`;
+ ${D.people.length?`<div class="tw"><table><tr><th style="width:60px">دفع</th><th>الاسم</th><th>المبلغ</th><th>طريقة الدفع</th></tr>${D.people.map(p=>`<tr><td><input type="checkbox" id="sbc_${p.id}" style="width:24px;height:24px" ${paid[p.id]?'checked':''} ${CANW()?'':'disabled'} onchange="subTick('${p.id}',this.checked)"></td><td>${esc(p.name)}</td><td><input type="number" style="width:110px" value="${paid[p.id]?paid[p.id].amt:((D.subCustom&&D.subCustom[k]&&D.subCustom[k][p.id])||amt||'')}" ${CANW()?'':'disabled'} onchange="subPAmt('${p.id}',this.value)"></td><td><select ${CANW()?'':'disabled'} onchange="subPW('${p.id}',this.value)">${D.wallets.map(w=>`<option value="${w.id}" ${(paid[p.id]?paid[p.id].w:(subRowW[p.id]||subWallet()))===w.id?'selected':''}>${esc(w.name)}</option>`).join('')}</select></td></tr>`).join('')}</table></div>`:'<div class="card" style="color:var(--mu);text-align:center">مفيش أعضاء لسه. أضف الأسماء من فوق.</div>'}`;
 }
+let subRowW={};
+async function subPW(id,w){const tid='sub_'+subKey()+'_'+id,ex=D.tx.find(x=>x.id===tid);if(ex){const t=Object.assign({},ex,{w});if(await upsertTx(t))ex.w=w}else subRowW[id]=w;sub()}
 function memAmt(id){const k=subKey();return +((D.subCustom&&D.subCustom[k]&&D.subCustom[k][id])||(D.subAmt&&D.subAmt[subMode])||0)}
 async function subPAmt(id,v){v=+v||0;const k=subKey(),tid='sub_'+k+'_'+id,ex=D.tx.find(x=>x.id===tid);
  if(ex){if(!(v>0)){toast('المبلغ لازم يكون أكبر من صفر');sub();return}const t=Object.assign({},ex,{amt:v});if(await upsertTx(t))ex.amt=v}
@@ -240,7 +242,7 @@ function subWallet(){const c=D.wallets.find(w=>w.id===D.subW);if(c)return c.id;r
 async function subTick(id,v){if(!CANW())return;const k=subKey(),tid='sub_'+k+'_'+id,amt=memAmt(id);
  if(v){if(!(amt>0)){toast('اكتب قيمة الاشتراك الأول');sub();return}
   const cur=today(),d=(subMode==='m'?cur.slice(0,7)===k:cur.slice(0,4)===k)?cur:(subMode==='m'?k+'-01':k+'-01-01');
-  const t={id:tid,type:'in',date:d,amt:amt,w:subWallet(),w2:'',cat:'اشتراكات',note:'اشتراك '+(subMode==='m'?'شهر ':'سنة ')+k,p:id,ts:Date.now()};
+  const t={id:tid,type:'in',date:d,amt:amt,w:subRowW[id]||subWallet(),w2:'',cat:'اشتراكات',note:'اشتراك '+(subMode==='m'?'شهر ':'سنة ')+k,p:id,ts:Date.now()};
   if(await upsertTx(t)){D.tx=D.tx.filter(x=>x.id!==tid);D.tx.push(t)}}
  else{const r=await SB.from('tx').delete().eq('id',tid);if(r.error){toast('تعذر الحذف');sub();return}D.tx=D.tx.filter(x=>x.id!==tid)}
  sub()}
